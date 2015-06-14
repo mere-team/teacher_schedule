@@ -4,16 +4,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using TeacherSheduleParser.Models;
+using TeacherScheduleParser.Models;
 
-namespace TeacherSheduleParser
+namespace TeacherScheduleParser
 {
-    public class SheduleParser
+    public class ScheduleParser
     {
         private IExcelDataReader _Reader;
         private const int MAX_COUNT_OF_LESSON = 8;
 
-        public SheduleParser(FileStream stream)
+        public ScheduleParser(FileStream stream)
         {
             string fileType = stream.Name.Split('.').Last();
             if (fileType != "xls" && fileType != "xlsx")

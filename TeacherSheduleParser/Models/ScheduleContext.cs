@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TeacherSheduleParser.Models
+namespace TeacherScheduleParser.Models
 {
-    class SheduleContext : DbContext
+    class ScheduleContext : DbContext
     {
         public DbSet<Faculty> Faculties { get; set; }
         public DbSet<Cathedra> Cathedries { get; set; }

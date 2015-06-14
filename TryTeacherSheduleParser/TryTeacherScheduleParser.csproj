@@ -49,9 +49,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TeacherSheduleParser\TeacherSheduleParser.csproj">
+    <ProjectReference Include="..\TeacherSheduleParser\TeacherScheduleParser.csproj">
       <Project>{d16f2984-0281-4b92-b923-d8ee72156be3}</Project>
-      <Name>TeacherSheduleParser</Name>
+      <Name>TeacherScheduleParser</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TeacherSheduleParser.Models;
+using TeacherScheduleParser.Models;
 using System.IO;
-using TeacherSheduleParser;
+using TeacherScheduleParser;
 using System.Text;
 
-namespace UnitTestTeacherSheduleParser
+namespace UnitTestTeacherScheduleParser
 {
     [TestClass]
     public class ParserTests
@@ -18,7 +18,7 @@ namespace UnitTestTeacherSheduleParser
             var result = new StreamReader(result_file);
             Assert.IsNotNull(result);
 
-            var parser = new SheduleParser(xls_file);
+            var parser = new ScheduleParser(xls_file);
             var teacher = new Teacher();
 
             while (parser.ReadNextRow())
@@ -65,5 +65,7 @@ namespace UnitTestTeacherSheduleParser
 
             return row;
         }
+
+
     }
 }

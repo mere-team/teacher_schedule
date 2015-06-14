@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TeacherSheduleParser.Models
+namespace TeacherScheduleParser.Models
 {
     public class Lesson
     {

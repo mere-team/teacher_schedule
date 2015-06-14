@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeacherSheduleParser", "TeacherSheduleParser\TeacherSheduleParser.csproj", "{D16F2984-0281-4B92-B923-D8EE72156BE3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeacherScheduleParser", "TeacherSheduleParser\TeacherScheduleParser.csproj", "{D16F2984-0281-4B92-B923-D8EE72156BE3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryTeacherSheduleParser", "TryTeacherSheduleParser\TryTeacherSheduleParser.csproj", "{A3478105-52E3-4746-A7FD-12538B1AA342}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryTeacherScheduleParser", "TryTeacherSheduleParser\TryTeacherScheduleParser.csproj", "{A3478105-52E3-4746-A7FD-12538B1AA342}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestTeacherSheduleParser", "UnitTestTeacherSheduleParser\UnitTestTeacherSheduleParser.csproj", "{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestTeacherScheduleParser", "UnitTestTeacherSheduleParser\UnitTestTeacherScheduleParser.csproj", "{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -62,9 +62,9 @@
     <Compile Include="Models\Faculty.cs" />
     <Compile Include="Models\Group.cs" />
     <Compile Include="Models\Lesson.cs" />
-    <Compile Include="Models\SheduleContext.cs" />
+    <Compile Include="Models\ScheduleContext.cs" />
     <Compile Include="Models\Teacher.cs" />
-    <Compile Include="SheduleParser.cs" />
+    <Compile Include="ScheduleParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
