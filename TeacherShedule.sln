@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeacherSheduleParser", "Tea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryTeacherSheduleParser", "TryTeacherSheduleParser\TryTeacherSheduleParser.csproj", "{A3478105-52E3-4746-A7FD-12538B1AA342}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestTeacherSheduleParser", "UnitTestTeacherSheduleParser\UnitTestTeacherSheduleParser.csproj", "{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A3478105-52E3-4746-A7FD-12538B1AA342}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3478105-52E3-4746-A7FD-12538B1AA342}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3478105-52E3-4746-A7FD-12538B1AA342}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
