@@ -3,13 +3,22 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeacherScheduleParser", "TeacherSheduleParser\TeacherScheduleParser.csproj", "{D16F2984-0281-4B92-B923-D8EE72156BE3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryTeacherScheduleParser", "TryTeacherSheduleParser\TryTeacherScheduleParser.csproj", "{A3478105-52E3-4746-A7FD-12538B1AA342}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestTeacherScheduleParser", "UnitTestTeacherSheduleParser\UnitTestTeacherScheduleParser.csproj", "{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SheduleServer", "SheduleServer\SheduleServer.csproj", "{01C2AFB3-C8EB-4C39-9952-98191F33E501}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeacherSchedule", "Schedule\TeacherSchedule.csproj", "{1C0218C8-33EA-4213-809C-F559CA21EC99}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishScripts", "PublishScripts", "{29CD631D-EDEB-4D70-9A94-B5BF6CE221AF}"
+	ProjectSection(SolutionItems) = preProject
+		PublishScripts\AzureWebsitePublishModule.psm1 = PublishScripts\AzureWebsitePublishModule.psm1
+		PublishScripts\Publish-WebApplicationWebsite.ps1 = PublishScripts\Publish-WebApplicationWebsite.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configurations", "Configurations", "{AC0CE9D1-1A43-4B13-A9CF-7F3C1908BD6E}"
+	ProjectSection(SolutionItems) = preProject
+		PublishScripts\Configurations\Schedule-WAWS-dev.json = PublishScripts\Configurations\Schedule-WAWS-dev.json
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +26,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D16F2984-0281-4B92-B923-D8EE72156BE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D16F2984-0281-4B92-B923-D8EE72156BE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D16F2984-0281-4B92-B923-D8EE72156BE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D16F2984-0281-4B92-B923-D8EE72156BE3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A3478105-52E3-4746-A7FD-12538B1AA342}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A3478105-52E3-4746-A7FD-12538B1AA342}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3478105-52E3-4746-A7FD-12538B1AA342}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -29,12 +34,15 @@ Global
 		{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{01C2AFB3-C8EB-4C39-9952-98191F33E501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01C2AFB3-C8EB-4C39-9952-98191F33E501}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01C2AFB3-C8EB-4C39-9952-98191F33E501}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{01C2AFB3-C8EB-4C39-9952-98191F33E501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C0218C8-33EA-4213-809C-F559CA21EC99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C0218C8-33EA-4213-809C-F559CA21EC99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C0218C8-33EA-4213-809C-F559CA21EC99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C0218C8-33EA-4213-809C-F559CA21EC99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AC0CE9D1-1A43-4B13-A9CF-7F3C1908BD6E} = {29CD631D-EDEB-4D70-9A94-B5BF6CE221AF}
 	EndGlobalSection
 EndGlobal

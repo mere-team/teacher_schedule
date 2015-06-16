@@ -53,12 +53,6 @@
     <Compile Include="ParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TeacherSheduleParser\TeacherScheduleParser.csproj">
-      <Project>{d16f2984-0281-4b92-b923-d8ee72156be3}</Project>
-      <Name>TeacherScheduleParser</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

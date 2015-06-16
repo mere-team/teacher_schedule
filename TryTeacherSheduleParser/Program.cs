@@ -1,7 +1,7 @@
-﻿using System.IO;
+﻿/**using System.IO;
 using System.Net;
-using TeacherScheduleParser;
-using TeacherScheduleParser.Models;
+using TeacherSchedule;
+using TeacherSchedule.Models;
 using System.Text;
 using System.Diagnostics;
 
@@ -57,6 +57,42 @@ namespace TryTeacherSheduleParser
             sw.Close();
 
             Process.Start("result.txt");
+        }
+    }
+}
+    */
+
+
+using System;
+using System.Net.Mail;
+
+namespace TryTeacherSheduleParser
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            try { 
+            MailMessage mail = new MailMessage();
+                SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+
+                mail.From = new MailAddress("we.are.mere.team@gmail.com");
+                mail.To.Add("max.mrtnv@gmail.com");
+                mail.Subject = "Test Mail";
+                mail.Body = "This is for testing SMTP mail from GMAIL";
+
+                SmtpServer.Port = 587;
+                SmtpServer.Credentials = new System.Net.NetworkCredential("we.are.mere.team@gmail.com", "liljohnlolita");
+                SmtpServer.EnableSsl = true;
+
+                SmtpServer.Send(mail);
+                Console.WriteLine("mail Send");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            Console.ReadLine();
         }
     }
 }
