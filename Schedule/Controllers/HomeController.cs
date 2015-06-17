@@ -12,13 +12,7 @@ namespace TeacherSchedule.Controllers
         private ScheduleContext db = new ScheduleContext();
         public ActionResult Index()
         {
-            ViewBag.Title = "Home Page";
-
-            db.Faculties.ToList();
-            var t = db.Cathedries.ToList();
-            db.Groups.ToList();
-            db.Teachers.ToList();
-            db.Lessons.ToList();
+            ViewBag.Title = "Home";
 
             return View();
         }

@@ -12,21 +12,19 @@ using TeacherSchedule.Models;
 
 namespace Schedule.Controllers
 {
-    public class TeacherScheduleController : ApiController
+    public class TeacherScheduleController : Controller
     {
         // GET: TeacherSchedule
-        public Teacher Get()
+        public void Update()
         {
             string remoteUri = "http://www.ulstu.ru/schedule/teachers/%a8%ad.%ef%a7..xls";
 #warning Указать правильный путь
             string fileName = "E:/foreign_languages.xls";
             var webClient = new WebClient();
             webClient.DownloadFile(remoteUri, fileName);
-            var file = File.Open(fileName, FileMode.Open, FileAccess.Read);
+            var file = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read);
             var parser = new ScheduleParser(file);
 
-          
-            Teacher teacher = null;
             while (parser.ReadNextRow())
             {
                 string row = parser.ReadRow();
@@ -34,10 +32,8 @@ namespace Schedule.Controllers
                 if (!row.Contains("расписан"))
                     continue;
 
-                teacher = parser.GetTeacherShedule();
+                var teacher = parser.GetTeacherShedule();
             }
-
-            return teacher;
         }
     }
 }

@@ -9,6 +9,11 @@ namespace TeacherSchedule.Models
 {
     class ScheduleContext : DbContext
     {
+        //public ScheduleContext() : base()
+        //{
+
+        //}
+
         public DbSet<Faculty> Faculties { get; set; }
         public DbSet<Cathedra> Cathedries { get; set; }
         public DbSet<Group> Groups { get; set; }
