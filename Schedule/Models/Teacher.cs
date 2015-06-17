@@ -21,5 +21,10 @@ namespace TeacherSchedule.Models
         public virtual Cathedra Cathedra { get; set; }
 
         public virtual ICollection<Lesson> Lessons { get; set; }
+
+        public Teacher()
+        {
+
+        }
     }
 }

@@ -172,7 +172,8 @@ namespace TeacherSchedule
                 Teacher = teacher
             };
 
-            Group group = db.Groups.Where(g => g.Name == temp[0]).FirstOrDefault();
+            var t = temp[0];
+            var group = db.Groups.Where(g => g.Name == t).FirstOrDefault();
             if (group == null)
             {
                 group = new Group { Name = temp[0] };
