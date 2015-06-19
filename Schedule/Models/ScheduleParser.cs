@@ -130,6 +130,7 @@ namespace TeacherSchedule
                             var lesson2 = GetLesson(cell, number + 1, j, 2, teacher);
 
                             cell = row_of_lessons[2][j];
+                            row_of_lessons[2][j] = "";
                             lesson1.Name = lesson2.Name = cell;
 
                             lessons.Add(lesson1);
@@ -158,7 +159,7 @@ namespace TeacherSchedule
             try {
                 teacher.Name = name_paths[0] + " " + name_paths[1] + "." + name_paths[2] + ".";
             }
-            catch (ArgumentOutOfRangeException ex)
+            catch (IndexOutOfRangeException ex)
             {
                 teacher.Name = name;
                 ErrorNotificationToMail.Warninig("Ошибка при парсинге имени", "Не удалось правильно распарсить имя: " + name);

@@ -14,7 +14,9 @@ namespace TeacherSchedule.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = "Home";
-
+            //db.Database.Delete();
+            //db.Database.CreateIfNotExists();
+            //db.Database.Initialize(true);
             db.Faculties.ToList();
             var t = db.Cathedries.ToList();
             db.Groups.ToList();

@@ -12,7 +12,7 @@ namespace TeacherSchedule.Models
         public int Number { get; set; }
 
         [Required]
-        [MaxLength(15, ErrorMessage = "Too long name of lesson")]
+        [MaxLength(40, ErrorMessage = "Too long name of lesson")]
         public string Name { get; set; }
 
         [Required]
@@ -24,7 +24,7 @@ namespace TeacherSchedule.Models
         public int NumberOfWeek { get; set; }
 
         [Required]
-        [MaxLength(10, ErrorMessage = "Too long name of cabinet")]
+        [MaxLength(20, ErrorMessage = "Too long name of cabinet")]
         public string Cabinet { get; set; }
 
         [Required]

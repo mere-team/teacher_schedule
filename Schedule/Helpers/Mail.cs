@@ -37,7 +37,7 @@ public static class Mail
         }
         catch (Exception e)
         {
-            throw new Exception("Mail.Send: " + e.Message);
+            //throw new Exception("Mail.Send: " + e.Message);
         }
     }
 }
