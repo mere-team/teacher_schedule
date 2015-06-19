@@ -21,7 +21,7 @@ namespace TeacherSchedule.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext()
-            : base(@"Data Source = (LocalDB)\MSSQLLocalDB; AttachDbFilename=C:\Users\Egor\Documents\db2.mdf;Integrated Security = True; Connect Timeout = 30", throwIfV1Schema: false)
+            : base("DefaultConnection", throwIfV1Schema: false)
         {
         }
         

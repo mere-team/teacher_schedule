@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TeacherScheduleParser.Models
+namespace TeacherSchedule.Models
 {
     public static class Departments
     {

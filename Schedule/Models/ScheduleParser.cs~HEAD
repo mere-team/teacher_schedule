@@ -1,17 +1,19 @@
 ﻿using Excel;
+using Schedule.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using TeacherScheduleParser.Models;
+using TeacherSchedule.Models;
 
-namespace TeacherScheduleParser
+namespace TeacherSchedule
 {
-    public class ScheduleParser
+    public class ScheduleParser : IDisposable
     {
         private IExcelDataReader _Reader;
         private const int MAX_COUNT_OF_LESSON = 8;
+        private ScheduleContext db = new ScheduleContext();
 
         public ScheduleParser(FileStream stream)
         {
@@ -32,9 +34,7 @@ namespace TeacherScheduleParser
             {
                 row.Append(_Reader.GetString(i));
             }
-
             var result = row.ToString();
-
             return result;
         }
 
@@ -43,7 +43,6 @@ namespace TeacherScheduleParser
             while (true)
             {
                 bool isNotEnd = _Reader.Read();
-
                 if (!isNotEnd)
                     return isNotEnd;
 
@@ -58,9 +57,7 @@ namespace TeacherScheduleParser
         public Teacher GetTeacherShedule()
         {
             ReadNextRow();
-
             var teacher = GetTeacher();
-
             ReadNextRow();
             var lessons = new List<Lesson>();
 
@@ -118,24 +115,44 @@ namespace TeacherScheduleParser
                 }
             }
             teacher.Lessons = lessons;
-
             return teacher;
         }
 
         private Teacher GetTeacher()
         {
-            var teacher = new Teacher
+            var teacher = new Teacher();
+            string name = _Reader.GetString(1).Trim();
+            string[] name_paths = name.Split();
+            try {
+                teacher.Name = name_paths[0] + " " + name_paths[1] + "." + name_paths[2] + ".";
+            }
+            catch (ArgumentOutOfRangeException ex)
             {
-                Name = _Reader.GetString(1),
-                Cathedra = new Cathedra // TODO: узнать точный факультет и кафедру
-                {
-                    Name = _Reader.GetString(2)
-                },
-                Faculty = new Faculty
-                {
-                    Name = Departments.GetFaculty(_Reader.GetString(2))
-                }
-            };
+                teacher.Name = name;
+                ErrorNotificationToMail.Warninig("Ошибка при парсинге имени", "Не удалось правильно распарсить имя: " + name);
+            }
+
+            var cathedra_name = _Reader.GetString(2).Trim();
+            var cathedra = db.Cathedries.Where(c => c.Name == cathedra_name).FirstOrDefault();
+            if (cathedra == null)
+            {
+                cathedra = new Cathedra { Name = cathedra_name };
+                db.Cathedries.Add(cathedra);
+                db.SaveChanges();
+            }
+
+            teacher.CathedraId = cathedra.Id;
+            teacher.Cathedra = cathedra;
+
+            var faculty_name = Departments.GetFaculty(cathedra_name);
+            var faculty = db.Faculties.Where(f => f.Name == faculty_name).FirstOrDefault();
+            if (faculty == null)
+            {
+                faculty = new Faculty { Name = faculty_name };
+                db.Faculties.Add(faculty);
+                db.SaveChanges();
+            }
+
             return teacher;
         }
 
@@ -148,8 +165,6 @@ namespace TeacherScheduleParser
             var lesson = new Lesson
             {
                 Number = number,
-                //GroupId = id TODO: заполнять groupId
-                Group = new Group { Name = temp[0] }, // запрос из бд, 
                 Cabinet = temp[1],
                 DayOfWeek = day_of_week,
                 NumberOfWeek = number_of_week,
@@ -157,7 +172,24 @@ namespace TeacherScheduleParser
                 Teacher = teacher
             };
 
+            var t = temp[0];
+            var group = db.Groups.Where(g => g.Name == t).FirstOrDefault();
+            if (group == null)
+            {
+                group = new Group { Name = temp[0] };
+                db.Groups.Add(group);
+                db.SaveChanges();
+            }
+            lesson.Group = group;
+            lesson.GroupId = group.Id;
+
             return lesson;
+        }
+
+        public void Dispose()
+        {
+            db.Dispose();
+            _Reader.Dispose();
         }
     }
 

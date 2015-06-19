@@ -1,9 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using TeacherScheduleParser.Models;
+using TeacherSchedule.Models;
 using System.IO;
-using TeacherScheduleParser;
-using System.Text;
+using TeacherSchedule;
 
 namespace UnitTestTeacherScheduleParser
 {
@@ -27,7 +26,7 @@ namespace UnitTestTeacherScheduleParser
 
                 if (row.Contains("расписан"))
                 {
-                    teacher = parser.GetTeacherShedule();
+                    teacher = parser.GetTeacherSchedule();
                     
                     string test_teacher = String.Format("N: {0}; F: {1}; C: {2}",
                         teacher.Name,

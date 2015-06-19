@@ -32,7 +32,7 @@ namespace Schedule.Controllers
                 if (!row.Contains("расписан"))
                     continue;
 
-                var teacher = parser.GetTeacherShedule();
+                var teacher = parser.GetTeacherSchedule();
             }
         }
     }

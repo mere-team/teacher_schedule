@@ -14,6 +14,7 @@ namespace TeacherSchedule
         private IExcelDataReader _Reader;
         private const int MAX_COUNT_OF_LESSON = 8;
         private ScheduleContext db = new ScheduleContext();
+        private bool _IsEndOfFile = false;
 
         public ScheduleParser(FileStream stream)
         {
@@ -25,6 +26,14 @@ namespace TeacherSchedule
                 _Reader = ExcelReaderFactory.CreateBinaryReader(stream);
             else
                 _Reader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+
+            for(int i = 0; i < 20; i++)
+            {
+                if (_IsEndOfFile || ReadRow().Contains("расписан"))
+                    return;
+
+                _IsEndOfFile = !ReadNextRow();
+            }
         }
 
         public string ReadRow()
@@ -54,7 +63,24 @@ namespace TeacherSchedule
             }
         }
 
-        public Teacher GetTeacherShedule()
+        public List<Teacher> GetTeachersSchedules()
+        {
+            if (_IsEndOfFile)
+                return null;
+
+            var teachers = new List<Teacher>();
+            do
+            {
+                string row = ReadRow();
+                if (row.Contains("расписан"))
+                {
+                    teachers.Add(GetTeacherSchedule());
+                }
+            } while (this.ReadNextRow());
+            return teachers;
+        }
+
+        public Teacher GetTeacherSchedule()
         {
             ReadNextRow();
             var teacher = GetTeacher();
@@ -114,6 +140,12 @@ namespace TeacherSchedule
                     lessons.AddRange(week_lessons.Values.ToList());
                 }
             }
+
+            foreach (var lesson in lessons)
+            {
+                db.Lessons.Add(lesson);
+                db.SaveChanges();
+            }
             teacher.Lessons = lessons;
             return teacher;
         }
@@ -131,6 +163,9 @@ namespace TeacherSchedule
                 teacher.Name = name;
                 ErrorNotificationToMail.Warninig("Ошибка при парсинге имени", "Не удалось правильно распарсить имя: " + name);
             }
+            var teacher_in_db = db.Teachers.Where(t => t.Name == teacher.Name).FirstOrDefault();
+            if (teacher_in_db != null)
+                return teacher_in_db;
 
             var cathedra_name = _Reader.GetString(2).Trim();
             var cathedra = db.Cathedries.Where(c => c.Name == cathedra_name).FirstOrDefault();
@@ -140,7 +175,6 @@ namespace TeacherSchedule
                 db.Cathedries.Add(cathedra);
                 db.SaveChanges();
             }
-
             teacher.CathedraId = cathedra.Id;
             teacher.Cathedra = cathedra;
 
@@ -152,6 +186,11 @@ namespace TeacherSchedule
                 db.Faculties.Add(faculty);
                 db.SaveChanges();
             }
+            teacher.FacultyId = faculty.Id;
+            teacher.Faculty = faculty;
+
+            db.Teachers.Add(teacher);
+            db.SaveChanges();
 
             return teacher;
         }
@@ -172,8 +211,8 @@ namespace TeacherSchedule
                 Teacher = teacher
             };
 
-            var t = temp[0];
-            var group = db.Groups.Where(g => g.Name == t).FirstOrDefault();
+            var groupName = temp[0];
+            Group group = db.Groups.Where(g => g.Name == groupName).FirstOrDefault();
             if (group == null)
             {
                 group = new Group { Name = temp[0] };
@@ -184,6 +223,11 @@ namespace TeacherSchedule
             lesson.GroupId = group.Id;
 
             return lesson;
+        }
+
+        public void SaveDataInDatabase()
+        {
+
         }
 
         public void Dispose()

@@ -5,10 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TeacherScheduleParser.Models
+namespace TeacherSchedule.Models
 {
     class ScheduleContext : DbContext
     {
+        //public ScheduleContext() : base()
+        //{
+
+        //}
+
         public DbSet<Faculty> Faculties { get; set; }
         public DbSet<Cathedra> Cathedries { get; set; }
         public DbSet<Group> Groups { get; set; }

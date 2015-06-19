@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace TeacherScheduleParser.Models
+namespace TeacherSchedule.Models
 {
     public class Teacher
     {
@@ -21,5 +21,10 @@ namespace TeacherScheduleParser.Models
         public virtual Cathedra Cathedra { get; set; }
 
         public virtual ICollection<Lesson> Lessons { get; set; }
+
+        public Teacher()
+        {
+
+        }
     }
 }
