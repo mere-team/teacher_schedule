@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Schedule.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,22 +18,16 @@ namespace Schedule.Controllers
         // GET: TeacherSchedule
         public void Update()
         {
-            string remoteUri = "http://www.ulstu.ru/schedule/teachers/%a8%ad.%ef%a7..xls";
-#warning Указать правильный путь
-            string fileName = "E:/foreign_languages.xls";
-            var webClient = new WebClient();
-            webClient.DownloadFile(remoteUri, fileName);
-            var file = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read);
-            var parser = new ScheduleParser(file);
-
-            while (parser.ReadNextRow())
+            using (var downloader = new ExcelDocumentDownloader())
             {
-                string row = parser.ReadRow();
-
-                if (!row.Contains("расписан"))
-                    continue;
-
-                var teacher = parser.GetTeacherSchedule();
+                var docs = downloader.DownloadDocuments();
+                foreach (var doc in docs)
+                {
+                    var parser = new ScheduleParser(doc);
+                    parser.GetTeachersSchedules();
+                    parser.SaveDataInDatabase();
+                    parser.Dispose();
+                }
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace TeacherSchedule.Models
@@ -20,6 +21,7 @@ namespace TeacherSchedule.Models
         public int CathedraId { get; set; }
         public virtual Cathedra Cathedra { get; set; }
 
+        [JsonIgnore]
         public virtual ICollection<Lesson> Lessons { get; set; }
     }
 }

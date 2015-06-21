@@ -13,12 +13,16 @@ namespace Schedule.Controllers
         private ScheduleContext _db = new ScheduleContext();
 
         // GET: Teacher
-        public ICollection<Teacher> Get(params int[] list)
+        public List<Teacher> Get()
         {
-            if (list == null)
-                return _db.Teachers.ToList();
-            else
-                return _db.Faculties.Where(c => c.Id == list[0]).FirstOrDefault().Teachers;
+            return _db.Teachers.ToList();
         }
+
+        public List<Lesson> Get(int id)
+        {
+            var lessons = _db.Lessons.Where(l => l.TeacherId == id).ToList();
+
+            return lessons;
+        } 
     }
 }

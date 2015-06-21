@@ -17,5 +17,12 @@ namespace Schedule.Controllers
         {
             return _db.Groups.ToList(); 
         }
+
+        public List<Lesson> Get(int id)
+        {
+            var lessons = _db.Lessons.Where(l => l.GroupId == id).ToList();
+
+            return lessons;
+        }
     }
 }

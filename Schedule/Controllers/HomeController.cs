@@ -13,26 +13,15 @@ namespace TeacherSchedule.Controllers
         private ScheduleContext db = new ScheduleContext();
         public ActionResult Index()
         {
-            ViewBag.Title = "Home";
+            ViewBag.Title = "УлГТУю Расписание преподавателей";
             //db.Database.Delete();
             //db.Database.CreateIfNotExists();
             //db.Database.Initialize(true);
-            db.Faculties.ToList();
-            var t = db.Cathedries.ToList();
-            db.Groups.ToList();
-            db.Teachers.ToList();
-            db.Lessons.ToList();
-
-            using (var downloader = new ExcelDocumentDownloader())
-            {
-                var docs = downloader.DownloadDocuments();
-                foreach (var doc in docs)
-                {
-                    var parser = new ScheduleParser(doc);
-                    parser.GetTeachersSchedules();
-                    parser.Dispose();
-                }
-            }
+            //db.Faculties.ToList();
+            //var t = db.Cathedries.ToList();
+            //db.Groups.ToList();
+            //db.Teachers.ToList();
+            //db.Lessons.ToList();
 
             return View();
         }

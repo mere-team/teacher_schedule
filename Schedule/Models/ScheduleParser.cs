@@ -96,7 +96,7 @@ namespace TeacherSchedule
                     row_of_lessons[i] = new string[_Reader.FieldCount];
                     for (int j = 0; j < row_of_lessons[i].Length; j++)
                     {
-                        row_of_lessons[i][j] = _Reader.GetString(j).Trim();
+                        row_of_lessons[i][j] = _Reader.GetString(j)?.Trim();
                     }
                 }
 
@@ -150,7 +150,7 @@ namespace TeacherSchedule
         private Teacher GetTeacher()
         {
             var teacher = new Teacher();
-            string name = _Reader.GetString(1).Trim();
+            string name = _Reader.GetString(1)?.Trim();
             string[] name_paths = name.Split();
             try
             {
@@ -162,7 +162,7 @@ namespace TeacherSchedule
                 ErrorNotificationToMail.Warninig("Ошибка при парсинге имени", "Не удалось правильно распарсить имя: " + name);
             }
 
-            var cathedra_name = _Reader.GetString(2).Trim();
+            var cathedra_name = _Reader.GetString(2)?.Trim();
             teacher.Cathedra = new Cathedra { Name = cathedra_name };
 
             var faculty_name = Departments.GetFaculty(cathedra_name);
