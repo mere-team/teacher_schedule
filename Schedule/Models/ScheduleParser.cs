@@ -15,6 +15,7 @@ namespace TeacherSchedule
         private const int MAX_COUNT_OF_LESSON = 8;
         private ScheduleContext db = new ScheduleContext();
         private bool _IsEndOfFile = false;
+        private List<Teacher> _Teachers = new List<Teacher>();
 
         public ScheduleParser(FileStream stream)
         {
@@ -27,7 +28,7 @@ namespace TeacherSchedule
             else
                 _Reader = ExcelReaderFactory.CreateOpenXmlReader(stream);
 
-            for(int i = 0; i < 20; i++)
+            for (int i = 0; i < 20; i++)
             {
                 if (_IsEndOfFile || ReadRow().Contains("расписан"))
                     return;
@@ -68,16 +69,15 @@ namespace TeacherSchedule
             if (_IsEndOfFile)
                 return null;
 
-            var teachers = new List<Teacher>();
             do
             {
                 string row = ReadRow();
                 if (row.Contains("расписан"))
                 {
-                    teachers.Add(GetTeacherSchedule());
+                    _Teachers.Add(GetTeacherSchedule());
                 }
             } while (this.ReadNextRow());
-            return teachers;
+            return _Teachers;
         }
 
         public Teacher GetTeacherSchedule()
@@ -96,7 +96,7 @@ namespace TeacherSchedule
                     row_of_lessons[i] = new string[_Reader.FieldCount];
                     for (int j = 0; j < row_of_lessons[i].Length; j++)
                     {
-                        row_of_lessons[i][j] = _Reader.GetString(j)?.Trim();
+                        row_of_lessons[i][j] = _Reader.GetString(j).Trim();
                     }
                 }
 
@@ -121,7 +121,8 @@ namespace TeacherSchedule
                         if (String.IsNullOrEmpty(cell))
                             continue;
 
-                        try {
+                        try
+                        {
                             week_lessons[j].Name = cell;
                         }
                         catch (KeyNotFoundException ex)
@@ -142,11 +143,6 @@ namespace TeacherSchedule
                 }
             }
 
-            foreach (var lesson in lessons)
-            {
-                db.Lessons.Add(lesson);
-                db.SaveChanges();
-            }
             teacher.Lessons = lessons;
             return teacher;
         }
@@ -156,7 +152,8 @@ namespace TeacherSchedule
             var teacher = new Teacher();
             string name = _Reader.GetString(1).Trim();
             string[] name_paths = name.Split();
-            try {
+            try
+            {
                 teacher.Name = name_paths[0] + " " + name_paths[1] + "." + name_paths[2] + ".";
             }
             catch (IndexOutOfRangeException ex)
@@ -164,34 +161,12 @@ namespace TeacherSchedule
                 teacher.Name = name;
                 ErrorNotificationToMail.Warninig("Ошибка при парсинге имени", "Не удалось правильно распарсить имя: " + name);
             }
-            var teacher_in_db = db.Teachers.Where(t => t.Name == teacher.Name).FirstOrDefault();
-            if (teacher_in_db != null)
-                return teacher_in_db;
 
             var cathedra_name = _Reader.GetString(2).Trim();
-            var cathedra = db.Cathedries.Where(c => c.Name == cathedra_name).FirstOrDefault();
-            if (cathedra == null)
-            {
-                cathedra = new Cathedra { Name = cathedra_name };
-                db.Cathedries.Add(cathedra);
-                db.SaveChanges();
-            }
-            teacher.CathedraId = cathedra.Id;
-            teacher.Cathedra = cathedra;
+            teacher.Cathedra = new Cathedra { Name = cathedra_name };
 
             var faculty_name = Departments.GetFaculty(cathedra_name);
-            var faculty = db.Faculties.Where(f => f.Name == faculty_name).FirstOrDefault();
-            if (faculty == null)
-            {
-                faculty = new Faculty { Name = faculty_name };
-                db.Faculties.Add(faculty);
-                db.SaveChanges();
-            }
-            teacher.FacultyId = faculty.Id;
-            teacher.Faculty = faculty;
-
-            db.Teachers.Add(teacher);
-            db.SaveChanges();
+            teacher.Faculty = new Faculty { Name = faculty_name };
 
             return teacher;
         }
@@ -213,34 +188,64 @@ namespace TeacherSchedule
             };
 
             var groupName = temp[0];
-            Group group = db.Groups.Where(g => g.Name == groupName).FirstOrDefault();
-            if (group == null)
-            {
-                group = new Group { Name = temp[0] };
-                db.Groups.Add(group);
-                db.SaveChanges();
-            }
-            lesson.Group = group;
-            lesson.GroupId = group.Id;
+            lesson.Group = new Group { Name = groupName };
 
             return lesson;
         }
 
         public void SaveDataInDatabase()
         {
+            foreach (var teacher in this._Teachers)
+            {
+                if (!db.Cathedries.Any(f => f.Name == teacher.Cathedra.Name))
+                {
+                    db.Cathedries.Add(teacher.Cathedra);
+                    db.SaveChanges();
+                }
 
+                if (!db.Faculties.Any(f => f.Name == teacher.Faculty.Name))
+                {
+                    db.Faculties.Add(teacher.Faculty);
+                    db.SaveChanges();
+                }
+
+                if (!db.Teachers.Any(t => t.Name == teacher.Name))
+                {
+                    db.Teachers.Add(teacher);
+                    db.SaveChanges();
+                }
+
+                foreach (var lesson in teacher.Lessons)
+                {
+                    if (!db.Groups.Any(g => g.Name == lesson.Group.Name))
+                    {
+                        db.Groups.Add(lesson.Group);
+                        db.SaveChanges();
+                    }
+
+                    if (!db.Lessons.Any(l => l.Name == lesson.Name))
+                    {
+                        db.Lessons.Add(lesson);
+                        db.SaveChanges();
+                    }
+                }
+            }
         }
+
 
         public void Dispose()
         {
             db.Dispose();
             _Reader.Dispose();
+            _Teachers = null;
+
+            GC.Collect();
         }
     }
 
     public class NotExcelDocumentFormatException : Exception
     {
-        public NotExcelDocumentFormatException(): base("File have not Excel document format (xls or xslx)")
+        public NotExcelDocumentFormatException() : base("File have not Excel document format (xls or xslx)")
         { }
     }
 }
