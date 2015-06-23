@@ -9,16 +9,18 @@ namespace Schedule.Controllers
     {
         private ScheduleContext db = new ScheduleContext();
 
-        public List<Cathedra> Get()
+        public IEnumerable<Cathedra> Get()
         {
-            var cathedries = db.Cathedries.ToList();
+            var cathedries = db.Cathedries.ToArray().Distinct(new CathedraComparer()).ToArray();
 
             return cathedries;
         }
 
-        public List<Teacher> Get(int id)
+        public IEnumerable<Teacher> Get(int id)
         {
-            var teachers = db.Teachers.Where(t => t.CathedraId == id).ToList();
+            var teachers = db.Teachers
+                .Where(t => t.CathedraId == id).ToArray()
+                .Distinct(new TeacherComparer()).ToArray();
 
             return teachers;
         }

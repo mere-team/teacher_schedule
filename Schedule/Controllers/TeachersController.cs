@@ -13,14 +13,16 @@ namespace Schedule.Controllers
         private ScheduleContext _db = new ScheduleContext();
 
         // GET: Teacher
-        public List<Teacher> Get()
+        public IEnumerable<Teacher> Get()
         {
-            return _db.Teachers.ToList();
+            return _db.Teachers.ToArray().Distinct(new TeacherComparer()).ToArray();
         }
 
-        public List<Lesson> Get(int id)
+        public IEnumerable<Lesson> Get(int id)
         {
-            var lessons = _db.Lessons.Where(l => l.TeacherId == id).ToList();
+            var lessons = _db.Lessons
+                .Where(l => l.TeacherId == id).ToArray()
+                .Distinct(new LessonComparer()).ToArray();
 
             return lessons;
         } 

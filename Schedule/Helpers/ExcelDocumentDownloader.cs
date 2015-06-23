@@ -10,26 +10,33 @@ namespace Schedule.Helpers
     public class ExcelDocumentDownloader : IDisposable
     {
         private string _TeacherScheduleUrl = "http://www.ulstu.ru/schedule/teachers/";
-        private FileStream[] docs;
+        private int _CurrentPosition;
+        private WebClient _Client;
+        private string[] _Urls;
 
-        public ExcelDocumentDownloader() { }
-
-        public FileStream[] DownloadDocuments()
+        public ExcelDocumentDownloader()
         {
-            var urls = GetUrls();
-            urls = GetFiltredUrls(urls);
-            docs = new FileStream[urls.Length];
-            var client = new WebClient();
+            _Urls = GetUrls();
+            this.FilterUrls();
+            _Client = new WebClient();
+        }
 
-            string path_prefix = HttpContext.Current.Server.MapPath(@"Content\Documents\");
-            for (int i = 0; i < docs.Length; i++)
-            {
-                string file_name = path_prefix + i.ToString() + ".xls";
-                client.DownloadFile(_TeacherScheduleUrl + urls[i], file_name);
-                docs[i] = File.Open(file_name, FileMode.Open, FileAccess.Read);
-            }
+        public bool DownloadNextDocument(out FileStream document)
+        {
+            document = null;
+            if (_CurrentPosition == _Urls.Length)
+                return false;
 
-            return docs;
+            string server_path = HttpContext.Current.Server.MapPath("");
+            var temp = server_path.Split('\\').Last();
+            server_path = server_path.Replace(temp, "");
+            string file_name = server_path + _CurrentPosition.ToString() + ".xls";
+
+            _Client.DownloadFile(_TeacherScheduleUrl + _Urls[_CurrentPosition], file_name);
+            document = File.Open(file_name, FileMode.Open, FileAccess.Read);
+
+            _CurrentPosition++;
+            return true;
         }
 
         private string[] GetUrls()
@@ -57,20 +64,14 @@ namespace Schedule.Helpers
             return urls;
         }
 
-        private string[] GetFiltredUrls(string[] urls)
+        private void FilterUrls()
         {
-            var filtredUrls = urls.Where(u => u.EndsWith(".xls") || u.EndsWith(".xlsx"));
-            return filtredUrls.ToArray();
+            _Urls = _Urls.Where(u => u.EndsWith(".xls") || u.EndsWith(".xlsx")).ToArray();
         }
 
         public void Dispose()
         {
-            foreach (FileStream doc in docs)
-            {
-                doc?.Dispose();
-                if (File.Exists(doc.Name))
-                    File.Delete(doc.Name);
-            }
+            _Client.Dispose();
         }
     }
 }

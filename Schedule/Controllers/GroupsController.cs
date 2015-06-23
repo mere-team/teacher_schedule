@@ -13,14 +13,16 @@ namespace Schedule.Controllers
         private ScheduleContext _db = new ScheduleContext();
 
         // GET: Groups
-        public ICollection<Group> Get()
+        public IEnumerable<Group> Get()
         {
-            return _db.Groups.ToList(); 
+            return _db.Groups.ToArray().Distinct(new GroupComparer()).ToArray(); 
         }
 
-        public List<Lesson> Get(int id)
+        public IEnumerable<Lesson> Get(int id)
         {
-            var lessons = _db.Lessons.Where(l => l.GroupId == id).ToList();
+            var lessons = _db.Lessons
+                .Where(l => l.GroupId == id).ToArray()
+                .Distinct(new LessonComparer()).ToList();
 
             return lessons;
         }
