@@ -163,10 +163,11 @@ namespace TeacherSchedule
             }
 
             var cathedra_name = _Reader.GetString(2)?.Trim();
-            teacher.Cathedra = new Cathedra { Name = cathedra_name };
-
+            
             var faculty_name = Departments.GetFaculty(cathedra_name);
             teacher.Faculty = new Faculty { Name = faculty_name };
+
+            teacher.Cathedra = new Cathedra { Name = cathedra_name ,FacultyId = teacher.Faculty.Id};
 
             return teacher;
         }
@@ -199,6 +200,8 @@ namespace TeacherSchedule
             {
                 if (!db.Cathedries.Any(f => f.Name == teacher.Cathedra.Name))
                 {
+                    Cathedra cathedraForDatabase = teacher.Cathedra;
+                    cathedraForDatabase.Faculty = null;
                     db.Cathedries.Add(teacher.Cathedra);
                     db.SaveChanges();
                 }
@@ -211,7 +214,11 @@ namespace TeacherSchedule
 
                 if (!db.Teachers.Any(t => t.Name == teacher.Name))
                 {
-                    db.Teachers.Add(teacher);
+                    Teacher teacherForDatabase = teacher;
+                    teacherForDatabase.Cathedra = null;
+                    teacherForDatabase.Faculty = null;
+                    teacherForDatabase.Lessons = null;
+                    db.Teachers.Add(teacherForDatabase);
                     db.SaveChanges();
                 }
 

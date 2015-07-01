@@ -13,6 +13,10 @@ namespace TeacherSchedule.Models
         [MaxLength(50)]
         public string Name { get; set; }
 
+        [Required]
+        public int FacultyId { get; set; }
+        public virtual Faculty Faculty { get; set; }
+
         [JsonIgnore]
         public virtual ICollection<Teacher> Teachers { get; set; }
 
