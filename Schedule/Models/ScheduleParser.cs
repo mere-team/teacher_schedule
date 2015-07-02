@@ -167,7 +167,7 @@ namespace TeacherSchedule
             var faculty_name = Departments.GetFaculty(cathedra_name);
             teacher.Faculty = new Faculty { Name = faculty_name };
 
-            teacher.Cathedra = new Cathedra { Name = cathedra_name ,FacultyId = teacher.Faculty.Id};
+            teacher.Cathedra = new Cathedra { Name = cathedra_name };
 
             return teacher;
         }
@@ -198,26 +198,31 @@ namespace TeacherSchedule
         {
             foreach (var teacher in this._Teachers)
             {
-                if (!db.Cathedries.Any(f => f.Name == teacher.Cathedra.Name))
-                {
-                    Cathedra cathedraForDatabase = teacher.Cathedra;
-                    cathedraForDatabase.Faculty = null;
-                    db.Cathedries.Add(teacher.Cathedra);
-                    db.SaveChanges();
-                }
-
                 if (!db.Faculties.Any(f => f.Name == teacher.Faculty.Name))
                 {
                     db.Faculties.Add(teacher.Faculty);
                     db.SaveChanges();
                 }
 
+                if (!db.Cathedries.Any(f => f.Name == teacher.Cathedra.Name))
+                {
+                    Cathedra cathedraForDatabase = new Cathedra
+                    {
+                        Name = teacher.Cathedra.Name,
+                        FacultyId = teacher.FacultyId
+                    };
+                    db.Cathedries.Add(cathedraForDatabase);
+                    db.SaveChanges();
+                }
+
                 if (!db.Teachers.Any(t => t.Name == teacher.Name))
                 {
-                    Teacher teacherForDatabase = teacher;
-                    teacherForDatabase.Cathedra = null;
-                    teacherForDatabase.Faculty = null;
-                    teacherForDatabase.Lessons = null;
+                    Teacher teacherForDatabase = new Teacher
+                    {
+                        Name = teacher.Name,
+                        CathedraId = teacher.CathedraId,
+                        FacultyId = teacher.FacultyId
+                    };
                     db.Teachers.Add(teacherForDatabase);
                     db.SaveChanges();
                 }
