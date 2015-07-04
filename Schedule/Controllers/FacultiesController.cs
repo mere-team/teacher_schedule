@@ -17,13 +17,12 @@ namespace Schedule.Controllers
             return faculties;
         }
 
-        public IEnumerable<Teacher> Get(int id)
+        public IEnumerable<Cathedra> Get(int id)
         {
-            var teachers = _db.Teachers
-                .Where(t => t.FacultyId == id).ToArray()
-                .Distinct(new TeacherComparer()).ToArray();
+            var cathedries = _db.Cathedries
+                .Where(c => c.Id == id).ToArray();
 
-            return teachers;
+            return cathedries;
         }
 
         

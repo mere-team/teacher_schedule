@@ -14,10 +14,6 @@ namespace TeacherSchedule.Models
         public string Name { get; set; }
 
         [Required]
-        public int FacultyId { get; set; }
-        public virtual Faculty Faculty { get; set; }
-
-        [Required]
         public int CathedraId { get; set; }
         public virtual Cathedra Cathedra { get; set; }
 

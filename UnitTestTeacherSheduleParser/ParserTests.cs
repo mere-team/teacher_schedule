@@ -29,7 +29,7 @@ namespace UnitTestTeacherScheduleParser
                     teacher = parser.GetTeacherSchedule();
                     string test_teacher = String.Format("N: {0}; F: {1}; C: {2}",
                         teacher.Name,
-                        teacher.Faculty.Name,
+                        teacher.Cathedra?.Faculty?.Name,
                         teacher.Cathedra?.Name);
                     string result_teacher = ReadRowFrom(result);
 
