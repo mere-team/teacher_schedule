@@ -15,14 +15,13 @@ namespace Schedule.Controllers
         // GET: Groups
         public IEnumerable<Group> Get()
         {
-            return _db.Groups.ToArray().Distinct(new GroupComparer()).ToArray(); 
+            return _db.Groups.ToArray(); 
         }
 
         public IEnumerable<Lesson> Get(int id)
         {
             var lessons = _db.Lessons
-                .Where(l => l.GroupId == id).ToArray()
-                .Distinct(new LessonComparer()).ToList();
+                .Where(l => l.GroupId == id).ToArray();
 
             return lessons;
         }

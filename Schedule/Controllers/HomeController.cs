@@ -43,8 +43,7 @@ namespace TeacherSchedule.Controllers
         
         public JsonResult Faculties()
         {
-            var facultyComparer = new FacultyComparer();
-            var faculties = db.Faculties.ToArray().Distinct(facultyComparer).ToArray();
+            var faculties = db.Faculties.ToArray();
             var list = from f in faculties
                        select new
                        {

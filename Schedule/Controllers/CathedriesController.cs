@@ -11,7 +11,7 @@ namespace Schedule.Controllers
 
         public IEnumerable<Cathedra> Get()
         {
-            var cathedries = db.Cathedries.ToArray().Distinct(new CathedraComparer()).ToArray();
+            var cathedries = db.Cathedries.ToArray();
 
             return cathedries;
         }
@@ -19,8 +19,7 @@ namespace Schedule.Controllers
         public IEnumerable<Teacher> Get(int id)
         {
             var teachers = db.Teachers
-                .Where(t => t.CathedraId == id).ToArray()
-                .Distinct(new TeacherComparer()).ToArray();
+                .Where(t => t.CathedraId == id).ToArray();
 
             return teachers;
         }
