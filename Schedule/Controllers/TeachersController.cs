@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Linq;
 using System.Web.Http;
-using System.Web.Mvc;
 using TeacherSchedule.Models;
-using Schedule.Helpers;
 
 namespace Schedule.Controllers
 {
@@ -13,12 +8,11 @@ namespace Schedule.Controllers
     {
         private ScheduleContext _db = new ScheduleContext();
 
-        public JsonResult Get(int id)
+        public dynamic Get(int id)
         {
-            var lessons = _db.Lessons
-                .Where(l => l.TeacherId == id).ToArray();
-
-            var dataLessons = from l in lessons
+            var teacher = _db.Teachers.FirstOrDefault(t => t.Id == id);
+            var lessons = _db.Lessons.Where(l => l.TeacherId == id).ToArray();
+            dynamic lessonsData = from l in lessons
                            select new  
                            {
                                Id = l.Id,
@@ -28,17 +22,12 @@ namespace Schedule.Controllers
                                NumberOfWeek = l.NumberOfWeek,
                                Cabinet = l.Cabinet,
                                GroupId = l.GroupId,
-                               Group = l.Group 
+                               Group = l.Group,
+                               TeacherId = l.Teacher.Id
                            };
 
-            var dataTeacher = _db.Teachers
-                .FirstOrDefault(t => t.Id == id);
-
-            var Obj = new { teacher = dataTeacher, lessons = dataLessons };
-
-            JsonResult json = new JsonResult { Data = Obj, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
-
-            return json; 
+            dynamic data = new { Teacher = teacher, Lessons = lessonsData };
+            return data; 
         } 
     }
 }

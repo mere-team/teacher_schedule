@@ -195,9 +195,14 @@ namespace TeacherSchedule
 
         public void SaveDataInDatabase()
         {
+            var faculties = db.Faculties.ToList();
+            var cathedries = db.Cathedries.ToList();
+            var teachers = db.Teachers.ToList();
+            var groups = db.Groups.ToList();
+
             foreach (var teacher in this._Teachers)
             {
-                var faculty = db.Faculties.Where(f => f.Name == teacher.Cathedra.Faculty.Name).FirstOrDefault();
+                var faculty = faculties.Where(f => f.Name == teacher.Cathedra.Faculty.Name).FirstOrDefault();
                 if (faculty == null)
                 {
                     faculty = new Faculty { Name = teacher.Cathedra.Faculty.Name };
@@ -207,7 +212,7 @@ namespace TeacherSchedule
                 teacher.Cathedra.Faculty = faculty;
                 teacher.Cathedra.FacultyId = faculty.Id;
 
-                var cathedra = db.Cathedries.Where(f => f.Name == teacher.Cathedra.Name).FirstOrDefault();
+                var cathedra = cathedries.Where(f => f.Name == teacher.Cathedra.Name).FirstOrDefault();
                 if (cathedra == null)
                 {
                     cathedra = new Cathedra
@@ -221,7 +226,7 @@ namespace TeacherSchedule
                 teacher.Cathedra = cathedra;
                 teacher.CathedraId = cathedra.Id;
 
-                var teach = db.Teachers.Where(t => t.Name == teacher.Name).FirstOrDefault();
+                var teach = teachers.Where(t => t.Name == teacher.Name).FirstOrDefault();
                 if (teach == null)
                 {
                     teach = new Teacher
@@ -234,44 +239,34 @@ namespace TeacherSchedule
                 }
                 teacher.Id = teach.Id;
 
-                foreach (var lesson in teacher.Lessons)
+                db.Database.ExecuteSqlCommand("DELETE FROM [Lessons] WHERE [TeacherId] = " + teacher.Id);
+
+                var lessons = new List<Lesson>(teacher.Lessons.Count);
+                foreach (var l in teacher.Lessons)
                 {
-                    var group = db.Groups.Where(g => g.Name == lesson.Group.Name).FirstOrDefault();
+                    var group = groups.Where(g => g.Name == l.Group.Name).FirstOrDefault();
                     if (group == null)
                     {
-                        group = new Group { Name = lesson.Group.Name };
-                        db.Groups.Add(lesson.Group);
+                        group = new Group { Name = l.Group.Name };
+                        db.Groups.Add(group);
                         db.SaveChanges();
                     }
-                    lesson.GroupId = group.Id;
-                    lesson.Group = group;
 
-                    var les = db.Lessons.Where(l => 
-                        l.Name == lesson.Name &&
-                        l.Number == lesson.Number &&
-                        l.NumberOfWeek == lesson.NumberOfWeek &&
-                        l.Group.Name == lesson.Group.Name &&
-                        l.Cabinet == lesson.Cabinet &&
-                        l.DayOfWeek == lesson.DayOfWeek &&
-                        l.TeacherId == lesson.Teacher.Id
-                    ).FirstOrDefault();
-                    
-                    if (les == null)
+                    var lesson = new Lesson
                     {
-                        les = new Lesson
-                        {
-                            Name = lesson.Name,
-                            Number = lesson.Number,
-                            NumberOfWeek = lesson.NumberOfWeek,
-                            GroupId = lesson.Group.Id,
-                            Cabinet = lesson.Cabinet,
-                            DayOfWeek = lesson.DayOfWeek,
-                            TeacherId = lesson.Teacher.Id,
-                        };
-                        db.Lessons.Add(lesson);
-                        db.SaveChanges();
-                    }
+                        Name = l.Name,
+                        Number = l.Number,
+                        NumberOfWeek = l.NumberOfWeek,
+                        GroupId = group.Id,
+                        Group = group,
+                        Cabinet = l.Cabinet,
+                        DayOfWeek = l.DayOfWeek,
+                        TeacherId = teacher.Id
+                    };
+                    lessons.Add(lesson);
                 }
+                db.Lessons.AddRange(lessons);
+                db.SaveChanges();
             }
         }
 

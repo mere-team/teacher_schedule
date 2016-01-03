@@ -1,4 +1,4 @@
-﻿/**using System.IO;
+﻿using System.IO;
 using System.Net;
 using TeacherSchedule;
 using TeacherSchedule.Models;
@@ -11,12 +11,12 @@ namespace TryTeacherSheduleParser
     {
         static void Main(string[] args)
         {
-            string remoteUri = "http://www.ulstu.ru/schedule/teachers/%a8%ad.%ef%a7..xls";
+            string remoteUri = "http://www.ulstu.ru/schedule/teachers/%88%ad%e4%ae%e0%ac%a0%e6%a8%ae%ad%ad%eb%a5%20%e1%a8%e1%e2%a5%ac%eb.xls";
             string fileName = "foreign_languages.xls";
             var webClient = new WebClient();
             Teacher teacher = new Teacher();
 
-            //webClient.DownloadFile(remoteUri, fileName);
+            webClient.DownloadFile(remoteUri, fileName);
 
             var file = File.Open(fileName, FileMode.Open, FileAccess.Read);
             var result_file = File.Open("result.txt", FileMode.Create, FileAccess.ReadWrite);
@@ -31,12 +31,11 @@ namespace TryTeacherSheduleParser
                 if (!row.Contains("расписан"))
                     continue;
 
-                teacher = parser.GetTeacherShedule();
+                teacher = parser.GetTeacherSchedule();
 
                 var info = new StringBuilder();
-                info.AppendFormat("N: {0}   F: {1}   C: {2}\r\n\r\n",
+                info.AppendFormat("N: {0}   C: {1}\r\n\r\n",
                     teacher.Name,
-                    teacher.Faculty.Name,
                     teacher.Cathedra?.Name);
 
                 foreach (Lesson l in teacher.Lessons)
@@ -57,42 +56,6 @@ namespace TryTeacherSheduleParser
             sw.Close();
 
             Process.Start("result.txt");
-        }
-    }
-}
-    */
-
-
-using System;
-using System.Net.Mail;
-
-namespace TryTeacherSheduleParser
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            try { 
-            MailMessage mail = new MailMessage();
-                SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
-
-                mail.From = new MailAddress("we.are.mere.team@gmail.com");
-                mail.To.Add("max.mrtnv@gmail.com");
-                mail.Subject = "Test Mail";
-                mail.Body = "This is for testing SMTP mail from GMAIL";
-
-                SmtpServer.Port = 587;
-                SmtpServer.Credentials = new System.Net.NetworkCredential("we.are.mere.team@gmail.com", "liljohnlolita");
-                SmtpServer.EnableSsl = true;
-
-                SmtpServer.Send(mail);
-                Console.WriteLine("mail Send");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-            Console.ReadLine();
         }
     }
 }

@@ -27,12 +27,24 @@ namespace Schedule.Helpers
             if (_CurrentPosition == _Urls.Length)
                 return false;
 
-            string server_path = HttpContext.Current.Server.MapPath("");
+            string server_path = HttpContext.Current.Server.MapPath("") + "+";
             var temp = server_path.Split('\\').Last();
             server_path = server_path.Replace(temp, "");
-            string file_name = server_path + _CurrentPosition.ToString() + ".xls";
+            string file_name;
 
-            _Client.DownloadFile(_TeacherScheduleUrl + _Urls[_CurrentPosition], file_name);
+            // if file busy by another process, change file name, and try again
+            string name = _CurrentPosition.ToString();
+            while (true)
+            {
+                file_name = server_path + name + ".xls";
+                try {
+                    _Client.DownloadFile(_TeacherScheduleUrl + _Urls[_CurrentPosition], file_name);
+                    break;
+                }
+                catch (Exception ex) {
+                    name += _CurrentPosition;
+                }
+            }
             document = File.Open(file_name, FileMode.Open, FileAccess.Read);
 
             _CurrentPosition++;
