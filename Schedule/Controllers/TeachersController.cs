@@ -7,7 +7,7 @@ namespace Schedule.Controllers
 {
     public class TeachersController : ApiController
     {
-        private ScheduleContext _db = new ScheduleContext();
+        private readonly ScheduleContext _db = new ScheduleContext();
 
         public IEnumerable<Teacher> Get()
         {
@@ -21,19 +21,13 @@ namespace Schedule.Controllers
             dynamic lessonsData = from l in lessons
                            select new  
                            {
-                               Id = l.Id,
-                               Number = l.Number,
-                               Name = l.Name,
-                               DayOfWeek = l.DayOfWeek,
-                               NumberOfWeek = l.NumberOfWeek,
-                               Cabinet = l.Cabinet,
-                               GroupId = l.GroupId,
-                               Group = l.Group,
+                               l.Id, l.Number, l.Name,
+                               l.DayOfWeek, l.NumberOfWeek,
+                               l.Cabinet, l.GroupId, l.Group,
                                TeacherId = l.Teacher.Id
                            };
 
             dynamic data = new { Teacher = teacher, Lessons = lessonsData };
-            
             return data; 
         } 
     }

@@ -1,21 +1,21 @@
-﻿using Excel;
-using Schedule.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Excel;
+using Schedule.Helpers;
 using TeacherSchedule.Models;
 
-namespace TeacherSchedule
+namespace Schedule.Parsers
 {
     public class ScheduleParser : IDisposable
     {
-        private IExcelDataReader _Reader;
-        private const int MAX_COUNT_OF_LESSON = 8;
-        private ScheduleContext db = new ScheduleContext();
-        private bool _IsEndOfFile = false;
-        private List<Teacher> _Teachers = new List<Teacher>();
+        private readonly IExcelDataReader _reader;
+        private const int MaxCountOfLesson = 8;
+        private readonly ScheduleContext _db = new ScheduleContext();
+        private bool _isEndOfFile;
+        private List<Teacher> _teachers = new List<Teacher>();
 
         public ScheduleParser(FileStream stream)
         {
@@ -23,27 +23,30 @@ namespace TeacherSchedule
             if (fileType != "xls" && fileType != "xlsx")
                 throw new NotExcelDocumentFormatException();
 
-            if (fileType == "xls")
-                _Reader = ExcelReaderFactory.CreateBinaryReader(stream);
-            else
-                _Reader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+            _reader = fileType == "xls" ? 
+                ExcelReaderFactory.CreateBinaryReader(stream) : 
+                ExcelReaderFactory.CreateOpenXmlReader(stream);
 
+            SetCursorToScheduleBegin();
+        }
+
+        private void SetCursorToScheduleBegin()
+        {
             for (int i = 0; i < 20; i++)
             {
-                if (_IsEndOfFile || ReadRow().Contains("расписан"))
+                if (_isEndOfFile || ReadRow().Contains("расписан"))
                     return;
 
-                _IsEndOfFile = !ReadNextRow();
+                _isEndOfFile = !ReadNextRow();
             }
         }
 
         public string ReadRow()
         {
             var row = new StringBuilder();
-            for (int i = 0; i < _Reader.FieldCount; i++)
-            {
-                row.Append(_Reader.GetString(i));
-            }
+            for (int i = 0; i < _reader.FieldCount; i++)
+                row.Append(_reader.GetString(i));
+
             var result = row.ToString();
             return result;
         }
@@ -52,13 +55,15 @@ namespace TeacherSchedule
         {
             while (true)
             {
-                bool isNotEnd = _Reader.Read();
+                bool isNotEnd = _reader.Read();
                 if (!isNotEnd)
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                     return isNotEnd;
 
-                for (int i = 0; i < _Reader.FieldCount; i++)
+                for (int i = 0; i < _reader.FieldCount; i++)
                 {
-                    if (!String.IsNullOrEmpty(_Reader.GetString(i)))
+                    if (!string.IsNullOrEmpty(_reader.GetString(i)))
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                         return isNotEnd;
                 }
             }
@@ -66,18 +71,15 @@ namespace TeacherSchedule
 
         public List<Teacher> GetTeachersSchedules()
         {
-            if (_IsEndOfFile)
-                return null;
-
-            do
-            {
+            if (_isEndOfFile) return null;
+            do {
                 string row = ReadRow();
                 if (row.Contains("расписан"))
                 {
-                    _Teachers.Add(GetTeacherSchedule());
+                    _teachers.Add(GetTeacherSchedule());
                 }
-            } while (this.ReadNextRow());
-            return _Teachers;
+            } while (ReadNextRow());
+            return _teachers;
         }
 
         public Teacher GetTeacherSchedule()
@@ -87,51 +89,51 @@ namespace TeacherSchedule
             ReadNextRow();
             var lessons = new List<Lesson>();
 
-            for (int number = 0; number < MAX_COUNT_OF_LESSON; number++)
+            for (int number = 0; number < MaxCountOfLesson; number++)
             {
-                string[][] row_of_lessons = new string[4][];
-                for (int i = 0; i < row_of_lessons.Length; i++)
+                string[][] rowOfLessons = new string[4][];
+                for (int i = 0; i < rowOfLessons.Length; i++)
                 {
                     ReadNextRow();
-                    row_of_lessons[i] = new string[_Reader.FieldCount];
-                    for (int j = 0; j < row_of_lessons[i].Length; j++)
+                    rowOfLessons[i] = new string[_reader.FieldCount];
+                    for (int j = 0; j < rowOfLessons[i].Length; j++)
                     {
-                        row_of_lessons[i][j] = _Reader.GetString(j)?.Trim();
+                        rowOfLessons[i][j] = _reader.GetString(j)?.Trim();
                     }
                 }
 
-                for (int number_of_week = 1; number_of_week <= 2; number_of_week++)
+                for (int numberOfWeek = 1; numberOfWeek <= 2; numberOfWeek++)
                 {
-                    var week_lessons = new Dictionary<int, Lesson>();
+                    var weekLessons = new Dictionary<int, Lesson>();
 
                     for (int j = 1; j < 7; j++)
                     {
-                        string cell = row_of_lessons[(number_of_week - 1) * 2][j];
+                        string cell = rowOfLessons[(numberOfWeek - 1) * 2][j];
                         if (String.IsNullOrEmpty(cell))
                             continue;
 
-                        var lesson = GetLesson(cell, number + 1, j, number_of_week, teacher);
+                        var lesson = GetLesson(cell, number + 1, j, numberOfWeek, teacher);
                         if (lesson != null)
-                            week_lessons.Add(j, lesson);
+                            weekLessons.Add(j, lesson);
                     }
 
                     for (int j = 1; j < 7; j++)
                     {
-                        string cell = row_of_lessons[number_of_week + (number_of_week - 1)][j];
-                        if (String.IsNullOrEmpty(cell))
+                        string cell = rowOfLessons[numberOfWeek + (numberOfWeek - 1)][j];
+                        if (string.IsNullOrEmpty(cell))
                             continue;
 
                         try
                         {
-                            week_lessons[j].Name = cell;
+                            weekLessons[j].Name = cell;
                         }
-                        catch (KeyNotFoundException ex)
+                        catch (KeyNotFoundException)
                         {
                             var lesson1 = GetLesson(cell, number + 1, j, 1, teacher);
                             var lesson2 = GetLesson(cell, number + 1, j, 2, teacher);
 
-                            cell = row_of_lessons[2][j];
-                            row_of_lessons[2][j] = "";
+                            cell = rowOfLessons[2][j];
+                            rowOfLessons[2][j] = "";
                             lesson1.Name = lesson2.Name = cell;
 
                             lessons.Add(lesson1);
@@ -139,7 +141,7 @@ namespace TeacherSchedule
                         }
                     }
 
-                    lessons.AddRange(week_lessons.Values.ToList());
+                    lessons.AddRange(weekLessons.Values.ToList());
                 }
             }
 
@@ -150,44 +152,42 @@ namespace TeacherSchedule
         private Teacher GetTeacher()
         {
             var teacher = new Teacher();
-            string name = _Reader.GetString(1)?.Trim();
-            string[] name_paths = name.Split();
+            string name = _reader.GetString(1)?.Trim();
             try
             {
-                teacher.Name = name_paths[0] + " " + name_paths[1] + "." + name_paths[2] + ".";
+                // ReSharper disable once PossibleNullReferenceException
+                string[] namePaths = name.Split();
+                teacher.Name = namePaths[0] + " " + namePaths[1] + "." + namePaths[2] + ".";
             }
-            catch (IndexOutOfRangeException ex)
+            catch (Exception)
             {
                 teacher.Name = name;
                 ErrorNotificationToMail.Warninig("Ошибка при парсинге имени", "Не удалось правильно распарсить имя: " + name);
             }
 
-            var cathedra_name = _Reader.GetString(2)?.Trim();
-            
-            var faculty_name = Departments.GetFaculty(cathedra_name);
-
-            teacher.Cathedra = new Cathedra { Name = cathedra_name, Faculty = new Faculty { Name = faculty_name } };
-
+            var cathedraName = _reader.GetString(2)?.Trim();
+            var facultyName = Departments.GetFaculty(cathedraName);
+            teacher.Cathedra = new Cathedra { Name = cathedraName, Faculty = new Faculty { Name = facultyName } };
             return teacher;
         }
 
-        private Lesson GetLesson(string cell, int number, int day_of_week, int number_of_week, Teacher teacher)
+        private Lesson GetLesson(string cell, int number, int dayOfWeek, int numberOfWeek, Teacher teacher)
         {
-            string[] temp = cell.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (temp.Length < 2)
+            var cellParts = cell.Split(new [] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (cellParts.Length < 2)
                 return null;
 
             var lesson = new Lesson
             {
                 Number = number,
-                Cabinet = temp[1],
-                DayOfWeek = day_of_week,
-                NumberOfWeek = number_of_week,
+                Cabinet = cellParts[1],
+                DayOfWeek = dayOfWeek,
+                NumberOfWeek = numberOfWeek,
                 TeacherId = teacher.Id,
                 Teacher = teacher
             };
 
-            var groupName = temp[0];
+            var groupName = cellParts[0];
             lesson.Group = new Group { Name = groupName };
 
             return lesson;
@@ -195,24 +195,24 @@ namespace TeacherSchedule
 
         public void SaveDataInDatabase()
         {
-            var faculties = db.Faculties.ToList();
-            var cathedries = db.Cathedries.ToList();
-            var teachers = db.Teachers.ToList();
-            var groups = db.Groups.ToList();
+            var faculties = _db.Faculties.ToList();
+            var cathedries = _db.Cathedries.ToList();
+            var teachers = _db.Teachers.ToList();
+            var groups = _db.Groups.ToList();
 
-            foreach (var teacher in this._Teachers)
+            foreach (var teacher in _teachers)
             {
-                var faculty = faculties.Where(f => f.Name == teacher.Cathedra.Faculty.Name).FirstOrDefault();
+                var faculty = faculties.FirstOrDefault(f => f.Name == teacher.Cathedra.Faculty.Name);
                 if (faculty == null)
                 {
                     faculty = new Faculty { Name = teacher.Cathedra.Faculty.Name };
-                    db.Faculties.Add(faculty);
-                    db.SaveChanges();
+                    _db.Faculties.Add(faculty);
+                    _db.SaveChanges();
                 }
                 teacher.Cathedra.Faculty = faculty;
                 teacher.Cathedra.FacultyId = faculty.Id;
 
-                var cathedra = cathedries.Where(f => f.Name == teacher.Cathedra.Name).FirstOrDefault();
+                var cathedra = cathedries.FirstOrDefault(f => f.Name == teacher.Cathedra.Name);
                 if (cathedra == null)
                 {
                     cathedra = new Cathedra
@@ -220,13 +220,13 @@ namespace TeacherSchedule
                         Name = teacher.Cathedra.Name,
                         FacultyId = teacher.Cathedra.Faculty.Id
                     };
-                    db.Cathedries.Add(cathedra);
-                    db.SaveChanges();
+                    _db.Cathedries.Add(cathedra);
+                    _db.SaveChanges();
                 }
                 teacher.Cathedra = cathedra;
                 teacher.CathedraId = cathedra.Id;
 
-                var teach = teachers.Where(t => t.Name == teacher.Name).FirstOrDefault();
+                var teach = teachers.FirstOrDefault(t => t.Name == teacher.Name);
                 if (teach == null)
                 {
                     teach = new Teacher
@@ -234,22 +234,22 @@ namespace TeacherSchedule
                         Name = teacher.Name,
                         CathedraId = teacher.Cathedra.Id
                     };
-                    db.Teachers.Add(teach);
-                    db.SaveChanges();
+                    _db.Teachers.Add(teach);
+                    _db.SaveChanges();
                 }
                 teacher.Id = teach.Id;
 
-                db.Database.ExecuteSqlCommand("DELETE FROM [Lessons] WHERE [TeacherId] = " + teacher.Id);
+                _db.Database.ExecuteSqlCommand("DELETE FROM [Lessons] WHERE [TeacherId] = " + teacher.Id);
 
                 var lessons = new List<Lesson>(teacher.Lessons.Count);
                 foreach (var l in teacher.Lessons)
                 {
-                    var group = groups.Where(g => g.Name == l.Group.Name).FirstOrDefault();
+                    var group = groups.FirstOrDefault(g => g.Name == l.Group.Name);
                     if (group == null)
                     {
                         group = new Group { Name = l.Group.Name };
-                        db.Groups.Add(group);
-                        db.SaveChanges();
+                        _db.Groups.Add(group);
+                        _db.SaveChanges();
                     }
 
                     var lesson = new Lesson
@@ -265,17 +265,17 @@ namespace TeacherSchedule
                     };
                     lessons.Add(lesson);
                 }
-                db.Lessons.AddRange(lessons);
-                db.SaveChanges();
+                _db.Lessons.AddRange(lessons);
+                _db.SaveChanges();
             }
         }
 
 
         public void Dispose()
         {
-            db.Dispose();
-            _Reader.Dispose();
-            _Teachers = null;
+            _db.Dispose();
+            _reader.Dispose();
+            _teachers = null;
 
             GC.Collect();
         }

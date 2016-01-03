@@ -230,7 +230,7 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\Lesson.cs" />
     <Compile Include="Models\ScheduleContext.cs" />
-    <Compile Include="Models\ScheduleParser.cs" />
+    <Compile Include="Parsers\ScheduleParser.cs" />
     <Compile Include="Models\Teacher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\ApplicationOAuthProvider.cs" />

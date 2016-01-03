@@ -3,7 +3,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Web.Mvc;
-using TeacherSchedule;
+using Schedule.Parsers;
 
 namespace Schedule.Controllers
 {
@@ -36,7 +36,7 @@ namespace Schedule.Controllers
                 if (ex.InnerException != null)
                     message.Append("InnerException.Message:\r\n" + ex.InnerException.Message + "\r\n\r\n");
 
-                return title + message.ToString();
+                return title + message;
             }
 
             return "Данные обновлены";

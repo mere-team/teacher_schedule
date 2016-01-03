@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using System.Net;
-using TeacherSchedule;
 using TeacherSchedule.Models;
 using System.Text;
 using System.Diagnostics;
+using Schedule.Parsers;
 
 namespace TryTeacherSheduleParser
 {
