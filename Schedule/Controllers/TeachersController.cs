@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http;
 using TeacherSchedule.Models;
 
@@ -7,6 +8,11 @@ namespace Schedule.Controllers
     public class TeachersController : ApiController
     {
         private ScheduleContext _db = new ScheduleContext();
+
+        public IEnumerable<Teacher> Get()
+        {
+            return _db.Teachers.ToArray();
+        }
 
         public dynamic Get(int id)
         {
@@ -27,6 +33,7 @@ namespace Schedule.Controllers
                            };
 
             dynamic data = new { Teacher = teacher, Lessons = lessonsData };
+            
             return data; 
         } 
     }
