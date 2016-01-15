@@ -1,28 +1,23 @@
-﻿using System;
-using Schedule.Helpers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Linq;
 using System.Web.Mvc;
 using TeacherSchedule.Models;
-using Schedule.Controllers;
 
-namespace TeacherSchedule.Controllers
+namespace Schedule.Controllers
 {
     public class HomeController : Controller
     {
-        private ScheduleContext db = new ScheduleContext();
+        private readonly ScheduleContext _db = new ScheduleContext();
         public ActionResult Index()
         {
             ViewBag.Title = "УлГТУ. Расписание преподавателей.";
-            //db.Database.Delete();
-            //db.Database.CreateIfNotExists();
-            //db.Database.Initialize(true);
-            //db.Faculties.ToList();
-            //var t = db.Cathedries.ToList();
-            //db.Groups.ToList();
-            //db.Teachers.ToList();
-            //db.Lessons.ToList();
+            //_db.Database.Delete();
+            //_db.Database.CreateIfNotExists();
+            //_db.Database.Initialize(true);
+            //_db.Faculties.ToList();
+            //var t = _db.Cathedries.ToList();
+            //_db.Groups.ToList();
+            //_db.Teachers.ToList();
+            //_db.Lessons.ToList();
             //using (var downloader = new ExcelDocumentDownloader())
             //{
             //    var docs = downloader.DownloadDocuments();
@@ -35,7 +30,7 @@ namespace TeacherSchedule.Controllers
             //    }
             //}
 
-            ViewBag.Faculties = db.Faculties.ToList();
+            ViewBag.Faculties = _db.Faculties.ToList();
 
             return View();
         }
@@ -43,12 +38,11 @@ namespace TeacherSchedule.Controllers
         
         public JsonResult Faculties()
         {
-            var faculties = db.Faculties.ToArray();
+            var faculties = _db.Faculties.ToArray();
             var list = from f in faculties
                        select new
                        {
-                           Id = f.Id,
-                           Name = f.Name
+                           f.Id, f.Name
                        };
 
             var json = Json(list);
