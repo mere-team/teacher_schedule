@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -12,7 +13,7 @@ namespace Schedule.Parsers
 {
     public class StudentScheduleParser
     {
-        //private readonly StudentScheduleContext _db = new StudentScheduleContext();
+        private readonly StudentScheduleContext _db = new StudentScheduleContext();
 
         private readonly List<StudentGroup> _groups = new List<StudentGroup>();
         private readonly List<StudentLesson> _lessons = new List<StudentLesson>();
@@ -123,7 +124,7 @@ namespace Schedule.Parsers
                         var lesson = new StudentLesson
                         {
                             Number = j + 1,
-                            DayOfWeek = (i + 1) >= 7 ? i - 6 : i + 1,
+                            DayOfWeek = (i + 1) >= 7 ? i - 5 : i + 1,
                             NumberOfWeek = (i + 1) >= 7 ? 2 : 1,
                             Name = lessonName,
                             Group = group,
@@ -154,6 +155,39 @@ namespace Schedule.Parsers
             }
 
             return _lessons;
+        }
+
+        public void SaveInDatabase()
+        {
+            var groups = _db.Groups.ToList();
+            var teachers = _db.Teachers.ToList();
+
+            _db.Database.ExecuteSqlCommand("DELETE FROM [StudentLessons]");
+
+            var newGroups = GetGroups();
+            foreach (var newGroup in newGroups)
+            {
+                var group = groups.FirstOrDefault(g => g.Name == newGroup.Name);
+                if (group == null)
+                {
+                    _db.Groups.Add(newGroup);
+                    _db.SaveChanges();
+                }
+            }
+
+            var newLessons = GetSchedule();
+            foreach (var lesson in newLessons)
+            {
+                var teacher = teachers.FirstOrDefault(t => t.Name == lesson.Teacher.Name);
+                if (teacher == null)
+                {
+                    _db.Teachers.Add(lesson.Teacher);
+                    _db.SaveChanges();
+                }
+
+                _db.Lessons.Add(lesson);
+                _db.SaveChanges();
+            }
         }
     }
 }

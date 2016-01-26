@@ -10,7 +10,7 @@ namespace Schedule.Controllers
     public class ScheduleController : Controller
     {
         // GET: Schedule
-        public string Update()
+        public string UpdateTeacherSchedule()
         {
             try
             {
@@ -39,7 +39,29 @@ namespace Schedule.Controllers
                 return title + message;
             }
 
-            return "Данные обновлены";
+            return "Данные расписания преподавателей обновлены";
+        }
+
+        public string UpdateStudentSchedule()
+        {
+            try
+            {
+                StudentScheduleParser parser = new StudentScheduleParser();
+                parser.SaveInDatabase();
+            }
+            catch (Exception ex)
+            {
+                string title = "ERROR: " + ex.Message + "\r\n";
+                var message = new StringBuilder();
+                message.Append("Message:\r\n" + ex.Message + "\r\n\r\n");
+                message.Append("StackTrace:\r\n" + ex.StackTrace + "\r\n\r\n");
+                if (ex.InnerException != null)
+                    message.Append("InnerException.Message:\r\n" + ex.InnerException.Message + "\r\n\r\n");
+
+                return title + message;
+            }
+
+            return "Данные расписания студентов обновлены";
         }
     }
 }

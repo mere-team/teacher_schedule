@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Schedule.Models.Student_Schedule_Models;
 
 namespace Schedule.Models
 {

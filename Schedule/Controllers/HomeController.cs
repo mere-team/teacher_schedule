@@ -1,8 +1,6 @@
 ﻿using System.Linq;
 using System.Web.Mvc;
 using Schedule.Models;
-using TeacherSchedule.Models;
-using Schedule.Parsers;
 
 namespace Schedule.Controllers
 {
@@ -12,26 +10,15 @@ namespace Schedule.Controllers
         public ActionResult Index()
         {
             ViewBag.Title = "УлГТУ. Расписание преподавателей.";
-            //_db.Database.Delete();
-            //_db.Database.CreateIfNotExists();
-            //_db.Database.Initialize(true);
-            //_db.Faculties.ToList();
-            //var t = _db.Cathedries.ToList();
-            //_db.Groups.ToList();
-            //_db.Teachers.ToList();
-            //_db.Lessons.ToList();
-            //using (var downloader = new ExcelDocumentDownloader())
-            //{
-            //    var docs = downloader.DownloadDocuments();
-            //    foreach (var doc in docs)
-            //    {
-            //        var parser = new ScheduleParser(doc);
-            //        parser.GetTeachersSchedules();
-            //        parser.SaveDataInDatabase();
-            //        parser.Dispose();
-            //    }
-            //}
-            StudentScheduleParser parser = new StudentScheduleParser();
+//                        _db.Database.Delete();
+//                        _db.Database.CreateIfNotExists();
+//                        _db.Database.Initialize(true);
+//            Database.SetInitializer(new DropCreateDatabaseAlways<ScheduleContext>());
+//            Database.SetInitializer(new DropCreateDatabaseAlways<ApplicationDbContext>());
+//            Database.SetInitializer(new DropCreateDatabaseAlways<StudentScheduleContext>());
+// Drop migration history table if not works
+
+            ViewBag.Title = "УлГТУ. Расписание преподавателей. data udated";
             ViewBag.Faculties = _db.Faculties.ToList();
 
             return View();

@@ -5,7 +5,7 @@ namespace Schedule.Models.Student_Schedule_Models
     public class StudentScheduleContext : DbContext
     {
         public StudentScheduleContext() 
-            : base("DefaultConnection")
+            : base("AzureConnection")
         { }
 
         public DbSet<StudentGroup> Groups { get; set; }

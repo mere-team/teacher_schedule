@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryTeacherScheduleParser", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestTeacherScheduleParser", "UnitTestTeacherSheduleParser\UnitTestTeacherScheduleParser.csproj", "{5D89ACDF-AF3F-45CB-853B-0D2A61FB1A7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeacherSchedule", "Schedule\TeacherSchedule.csproj", "{1C0218C8-33EA-4213-809C-F559CA21EC99}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schedule", "Schedule\Schedule.csproj", "{1C0218C8-33EA-4213-809C-F559CA21EC99}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublishScripts", "PublishScripts", "{29CD631D-EDEB-4D70-9A94-B5BF6CE221AF}"
 	ProjectSection(SolutionItems) = preProject

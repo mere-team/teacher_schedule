@@ -58,9 +58,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Schedule\TeacherSchedule.csproj">
+    <ProjectReference Include="..\Schedule\Schedule.csproj">
       <Project>{1c0218c8-33ea-4213-809c-f559ca21ec99}</Project>
-      <Name>TeacherSchedule</Name>
+      <Name>Schedule</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

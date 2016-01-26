@@ -10,7 +10,7 @@ namespace Schedule.Models.Student_Schedule_Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(30)]
+        [MaxLength(70)]
         public string Name { get; set; }
 
         [JsonIgnore]
