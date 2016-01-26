@@ -23,7 +23,6 @@ namespace Schedule.Controllers
         public string Teachers() => ToJson(_db.Teachers.ToArray());
         public string TeacherLessons(int id)
         {
-            var teacher = _db.Teachers.FirstOrDefault(t => t.Id == id);
             var lessons = _db.Lessons.Where(l => l.TeacherId == id).ToArray();
             dynamic lessonsData = (from l in lessons
                                   select new
@@ -38,9 +37,7 @@ namespace Schedule.Controllers
                                       l.Group,
                                       TeacherId = l.Teacher.Id
                                   }).ToArray();
-
-            dynamic data = new { Teacher = teacher, Lessons = lessonsData };
-            return ToJson(data);
+            return ToJson(lessonsData);
         }
 
         public string Lesson(int id) => ToJson(_db.Lessons.Find(id));
