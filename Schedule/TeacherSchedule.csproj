@@ -229,6 +229,10 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\Lesson.cs" />
     <Compile Include="Models\ScheduleContext.cs" />
+    <Compile Include="Models\Student Schedule Models\StudentGroup.cs" />
+    <Compile Include="Models\Student Schedule Models\StudentLesson.cs" />
+    <Compile Include="Models\Student Schedule Models\StudentScheduleContext.cs" />
+    <Compile Include="Models\Student Schedule Models\StudentTeacher.cs" />
     <Compile Include="Parsers\ScheduleParser.cs" />
     <Compile Include="Models\Teacher.cs" />
     <Compile Include="Parsers\StudentScheduleParser.cs" />

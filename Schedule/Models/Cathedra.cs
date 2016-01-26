@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
+using TeacherSchedule.Models;
 
-namespace TeacherSchedule.Models
+namespace Schedule.Models
 {
     public class Cathedra
     {

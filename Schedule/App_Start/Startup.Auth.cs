@@ -8,6 +8,7 @@ using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Google;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
+using Schedule.Models;
 using TeacherSchedule.Providers;
 using TeacherSchedule.Models;
 

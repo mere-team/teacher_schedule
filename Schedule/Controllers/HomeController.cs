@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Web.Mvc;
+using Schedule.Models;
 using TeacherSchedule.Models;
 using Schedule.Parsers;
 
@@ -31,7 +32,6 @@ namespace Schedule.Controllers
             //    }
             //}
             StudentScheduleParser parser = new StudentScheduleParser();
-            parser.GetSchedule("");
             ViewBag.Faculties = _db.Faculties.ToList();
 
             return View();

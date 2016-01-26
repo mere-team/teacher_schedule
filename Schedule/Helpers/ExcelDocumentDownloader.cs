@@ -9,52 +9,52 @@ namespace Schedule.Helpers
 {
     public class ExcelDocumentDownloader : IDisposable
     {
-        private string _TeacherScheduleUrl = "http://www.ulstu.ru/schedule/teachers/";
-        private int _CurrentPosition;
-        private WebClient _Client;
-        private string[] _Urls;
+        private readonly string _teacherScheduleUrl = "http://www.ulstu.ru/schedule/teachers/";
+        private int _currentPosition;
+        private readonly WebClient _client;
+        private string[] _urls;
 
         public ExcelDocumentDownloader()
         {
-            _Urls = GetUrls();
-            this.FilterUrls();
-            _Client = new WebClient();
+            _urls = GetUrls();
+            FilterUrls();
+            _client = new WebClient();
         }
 
         public bool DownloadNextDocument(out FileStream document)
         {
             document = null;
-            if (_CurrentPosition == _Urls.Length)
+            if (_currentPosition == _urls.Length)
                 return false;
 
-            string server_path = HttpContext.Current.Server.MapPath("") + "+";
-            var temp = server_path.Split('\\').Last();
-            server_path = server_path.Replace(temp, "");
-            string file_name;
+            string serverPath = HttpContext.Current.Server.MapPath("") + "+";
+            var temp = serverPath.Split('\\').Last();
+            serverPath = serverPath.Replace(temp, "");
+            string fileName;
 
             // if file busy by another process, change file name, and try again
-            string name = _CurrentPosition.ToString();
+            string name = _currentPosition.ToString();
             while (true)
             {
-                file_name = server_path + name + ".xls";
+                fileName = serverPath + name + ".xls";
                 try {
-                    _Client.DownloadFile(_TeacherScheduleUrl + _Urls[_CurrentPosition], file_name);
+                    _client.DownloadFile(_teacherScheduleUrl + _urls[_currentPosition], fileName);
                     break;
                 }
                 catch (Exception ex) {
-                    name += _CurrentPosition;
+                    name += _currentPosition;
                 }
             }
-            document = File.Open(file_name, FileMode.Open, FileAccess.Read);
+            document = File.Open(fileName, FileMode.Open, FileAccess.Read);
 
-            _CurrentPosition++;
+            _currentPosition++;
             return true;
         }
 
         private string[] GetUrls()
         {
             var client = new WebClient();
-            string html = client.DownloadString(_TeacherScheduleUrl);
+            string html = client.DownloadString(_teacherScheduleUrl);
 
             Regex tagA = new Regex(@"(?inx)
                 <a \s [^>]*
@@ -78,12 +78,12 @@ namespace Schedule.Helpers
 
         private void FilterUrls()
         {
-            _Urls = _Urls.Where(u => u.EndsWith(".xls") || u.EndsWith(".xlsx")).ToArray();
+            _urls = _urls.Where(u => u.EndsWith(".xls") || u.EndsWith(".xlsx")).ToArray();
         }
 
         public void Dispose()
         {
-            _Client.Dispose();
+            _client.Dispose();
         }
     }
 }

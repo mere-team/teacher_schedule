@@ -2,9 +2,9 @@
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
-namespace Schedule.Models
+namespace Schedule.Models.Student_Schedule_Models
 {
-    public class Group
+    public class StudentGroup
     {
         [Key]
         public int Id { get; set; }
@@ -14,6 +14,6 @@ namespace Schedule.Models
         public string Name { get; set; }
 
         [JsonIgnore]
-        public virtual ICollection<Lesson> Lessons { get; set; }
+        public virtual ICollection<StudentLesson> Lessons { get; set; }
     }
 }

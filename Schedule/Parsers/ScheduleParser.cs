@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using Excel;
 using Schedule.Helpers;
-using TeacherSchedule.Models;
+using Schedule.Models;
 
 namespace Schedule.Parsers
 {

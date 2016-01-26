@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22823.1
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryTeacherScheduleParser", "TryTeacherSheduleParser\TryTeacherScheduleParser.csproj", "{A3478105-52E3-4746-A7FD-12538B1AA342}"
 EndProject
@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configurations", "Configura
 	ProjectSection(SolutionItems) = preProject
 		PublishScripts\Configurations\Schedule-WAWS-dev.json = PublishScripts\Configurations\Schedule-WAWS-dev.json
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TryStudentScheduleParser", "TryStudentScheduleParser\TryStudentScheduleParser.csproj", "{B9A4E76A-34D8-4F2A-B66D-CC817C965EB9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +40,10 @@ Global
 		{1C0218C8-33EA-4213-809C-F559CA21EC99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C0218C8-33EA-4213-809C-F559CA21EC99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C0218C8-33EA-4213-809C-F559CA21EC99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9A4E76A-34D8-4F2A-B66D-CC817C965EB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9A4E76A-34D8-4F2A-B66D-CC817C965EB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9A4E76A-34D8-4F2A-B66D-CC817C965EB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9A4E76A-34D8-4F2A-B66D-CC817C965EB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

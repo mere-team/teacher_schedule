@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Schedule.Models.Student_Schedule_Models;
 
-namespace Schedule.Models
+namespace Schedule.Models.Student_Schedule_Models
 {
-    public class Lesson
+    public class StudentLesson
     {
         [Key]
         public int Id { get; set; }
@@ -30,12 +29,9 @@ namespace Schedule.Models
 
         [Required]
         public int GroupId { get; set; }
+        public virtual StudentGroup Group { get; set; }
 
-        public virtual Group Group { get; set; }
-
-        [Required]
         public int TeacherId { get; set; }
-
-        public virtual Teacher Teacher { get; set; }
+        public virtual StudentTeacher Teacher { get; set; }
     }
 }

@@ -1,8 +1,8 @@
-﻿using Schedule.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Schedule.Helpers;
 
-namespace TeacherSchedule.Models
+namespace Schedule.Models
 {
     public static class Departments
     {

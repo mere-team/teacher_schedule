@@ -2,6 +2,7 @@
 using System.Web.Mvc;
 using TeacherSchedule.Models;
 using Newtonsoft.Json;
+using Schedule.Models;
 
 namespace Schedule.Controllers
 {

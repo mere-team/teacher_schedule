@@ -1,3 +1,5 @@
+using Schedule.Models;
+
 namespace Schedule.Migrations
 {
     using System;
@@ -5,14 +7,14 @@ namespace Schedule.Migrations
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<TeacherSchedule.Models.ScheduleContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<ScheduleContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
         }
 
-        protected override void Seed(TeacherSchedule.Models.ScheduleContext context)
+        protected override void Seed(ScheduleContext context)
         {
             //  This method will be called after migrating to the latest version.
 

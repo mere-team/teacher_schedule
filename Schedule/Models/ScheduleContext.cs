@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.Entity;
 
-namespace TeacherSchedule.Models
+namespace Schedule.Models
 {
-    class ScheduleContext : DbContext
+    internal class ScheduleContext : DbContext
     {
         public ScheduleContext()
             : base("DefaultConnection")
@@ -19,10 +14,5 @@ namespace TeacherSchedule.Models
         public DbSet<Group> Groups { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
-
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-        }
     }
 }
