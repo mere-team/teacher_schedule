@@ -28,7 +28,7 @@ namespace TryStudentScheduleParser
 
                 foreach (var l in lessons.Where(l => l.Group.Name == group.Name))
                 {
-                    info.AppendFormat("N: {0,-2}   N: {1,-17}  D: {2,-2}  WN: {3,-2}  C: {4,-12}  G: {5,-12}  T: {6,-16}\r\n",
+                    info.AppendFormat("N: {0,-2}   N: {1,-30}  D: {2,-2}  WN: {3,-2}  C: {4,-12}  G: {5,-12}  T: {6,-16}\r\n",
                         l.Number,
                         l.Name,
                         l.DayOfWeek,

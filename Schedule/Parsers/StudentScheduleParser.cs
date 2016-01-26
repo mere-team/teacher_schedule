@@ -78,6 +78,17 @@ namespace Schedule.Parsers
             if (_lessons.Count != 0)
                 return _lessons;
 
+            var teacherDb = new ScheduleContext();
+            string[] shortSurnames;
+            try
+            {
+                shortSurnames = teacherDb.Teachers.Where(teacher => teacher.Name.Split(' ').Length <= 4)
+                    .Select(t => t.Name.Split(' ').First().ToUpper()).ToArray();
+            }
+            catch
+            {
+                shortSurnames = new[] {"ЮДИН"};
+            }
             var webClient = new WebClient {Encoding = Encoding.GetEncoding("windows-1251")};
             for (int k = 0; k < _scheduleUrls.Count; k++)
             {
@@ -99,29 +110,43 @@ namespace Schedule.Parsers
                         if (col.InnerText.Trim() == "_") return;
 
                         var cell = col;
-                        var cellPieces =
-                            cell.InnerText.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries).ToList();
-                        var lessonName = cellPieces.First() + cellPieces.Skip(1)
-                            .TakeWhile(word => word.Length < 4).DefaultIfEmpty()
-                            .Aggregate((word, nextWord) => word + " " + nextWord);
+                        var cellPieces = cell.InnerText.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries).ToList();
+                        var lessonName = cellPieces.First() + " ";
+                        var subgroup = cellPieces.Skip(1)
+                            .TakeWhile(word => word.ToCharArray()
+                                                .Any(c => char.IsLower(c) || char.IsNumber(c) || char.IsPunctuation(c)) || 
+                                                    (word.Length <= 4 && !shortSurnames.Contains(word)))
+                                                .DefaultIfEmpty(); 
+                        // ReSharper disable once PossibleMultipleEnumeration
+                        lessonName += subgroup.Aggregate((word, nextWord) => word + " " + nextWord);
 
                         var lesson = new StudentLesson
                         {
                             Number = j + 1,
-                            DayOfWeek = i >= 7 ? i - 6 : i,
-                            NumberOfWeek = i >= 7 ? 2 : 1,
+                            DayOfWeek = (i + 1) >= 7 ? i - 6 : i + 1,
+                            NumberOfWeek = (i + 1) >= 7 ? 2 : 1,
                             Name = lessonName,
                             Group = group,
                             GroupId = group.Id,
                             Cabinet = cellPieces.LastOrDefault()
                         };
-                        cellPieces.Remove(lesson.Name);
+                        // ReSharper disable once PossibleMultipleEnumeration
+                        foreach (var element in subgroup.ToList())
+                            cellPieces.Remove(element);
+
+                        cellPieces.Remove(cellPieces.First());
                         cellPieces.Remove(lesson.Cabinet);
+                        cellPieces.RemoveAll(word => word.Trim().Length == 0);
+                        cellPieces = cellPieces.ConvertAll(word => (word.Length == 1) ? word + "." : word[0] + word.ToLowerInvariant().Substring(1));
                         var teacher = new StudentTeacher
                         {
-                            Name = cellPieces.DefaultIfEmpty().Aggregate((word1, word2) => word1 + " " + word2)
+                            Name = cellPieces.DefaultIfEmpty()
+                                        .Aggregate((word1, word2) => word1 + " " + word2)
+                                        ?.Replace("-", "")
                         };
                         lesson.Teacher = teacher;
+
+                        if (lessonName.Contains("Физкультура")) lesson.Name = "Физкультура";
 
                         _lessons.Add(lesson);
                     });
