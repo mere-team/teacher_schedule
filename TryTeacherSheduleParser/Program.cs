@@ -20,7 +20,7 @@ namespace TryTeacherSheduleParser
             var file = File.Open(fileName, FileMode.Open, FileAccess.Read);
             var resultFile = File.Open("result.txt", FileMode.Create, FileAccess.ReadWrite);
             var sw = new StreamWriter(resultFile);
-            var parser = new ScheduleParser(file);
+            var parser = new TeacherScheduleParser(file);
 
             sw.WriteLine("========================================= ВЫВОД ДАННЫХ ============================================\r\n");
             while (parser.ReadNextRow())

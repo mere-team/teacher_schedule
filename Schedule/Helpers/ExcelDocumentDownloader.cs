@@ -30,7 +30,7 @@ namespace Schedule.Helpers
             string serverPath = HttpContext.Current.Server.MapPath("") + "+";
             var temp = serverPath.Split('\\').Last();
             serverPath = serverPath.Replace(temp, "");
-            string fileName;
+            string fileName;    
 
             // if file busy by another process, change file name, and try again
             string name = _currentPosition.ToString();

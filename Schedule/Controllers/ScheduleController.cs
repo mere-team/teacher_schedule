@@ -1,8 +1,11 @@
 ﻿using Schedule.Helpers;
 using System;
+using System.Data.Entity;
 using System.IO;
 using System.Text;
 using System.Web.Mvc;
+using Schedule.Models;
+using Schedule.Models.Student_Schedule_Models;
 using Schedule.Parsers;
 
 namespace Schedule.Controllers
@@ -19,7 +22,7 @@ namespace Schedule.Controllers
                     FileStream doc;
                     while(downloader.DownloadNextDocument(out doc))
                     { 
-                        var parser = new ScheduleParser(doc);
+                        var parser = new TeacherScheduleParser(doc);
                         parser.GetTeachersSchedules();
                         parser.SaveDataInDatabase();
                         parser.Dispose();
@@ -46,7 +49,7 @@ namespace Schedule.Controllers
         {
             try
             {
-                StudentScheduleParser parser = new StudentScheduleParser();
+                var parser = new StudentScheduleParser();
                 parser.SaveInDatabase();
             }
             catch (Exception ex)
@@ -62,6 +65,21 @@ namespace Schedule.Controllers
             }
 
             return "Данные расписания студентов обновлены";
+        }
+
+        public string RecreateDatabase()
+        {
+            var db = new ScheduleContext();
+
+            db.Database.Delete();
+            db.Database.CreateIfNotExists();
+            db.Database.Initialize(true);
+            Database.SetInitializer(new DropCreateDatabaseAlways<ScheduleContext>());
+            Database.SetInitializer(new DropCreateDatabaseAlways<ApplicationDbContext>());
+            Database.SetInitializer(new DropCreateDatabaseAlways<StudentScheduleContext>());
+            // Drop migration history table if not works
+
+            return "БД создана заново";
         }
     }
 }

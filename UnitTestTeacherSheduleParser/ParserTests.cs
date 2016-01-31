@@ -15,7 +15,7 @@ namespace UnitTestTeacherSheduleParser
             var result = new StreamReader(resultFile);
             Assert.IsNotNull(result);
 
-            var parser = new ScheduleParser(xlsFile);
+            var parser = new TeacherScheduleParser(xlsFile);
 
             while (parser.ReadNextRow())
             {

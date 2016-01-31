@@ -9,7 +9,7 @@ using Schedule.Models;
 
 namespace Schedule.Parsers
 {
-    public class ScheduleParser : IDisposable
+    public class TeacherScheduleParser : IDisposable
     {
         private readonly IExcelDataReader _reader;
         private const int MaxCountOfLesson = 8;
@@ -17,7 +17,7 @@ namespace Schedule.Parsers
         private bool _isEndOfFile;
         private List<Teacher> _teachers = new List<Teacher>();
 
-        public ScheduleParser(FileStream stream)
+        public TeacherScheduleParser(FileStream stream)
         {
             string fileType = stream.Name.Split('.').Last();
             if (fileType != "xls" && fileType != "xlsx")
@@ -195,14 +195,9 @@ namespace Schedule.Parsers
 
         public void SaveDataInDatabase()
         {
-            var faculties = _db.Faculties.ToList();
-            var cathedries = _db.Cathedries.ToList();
-            var teachers = _db.Teachers.ToList();
-            var groups = _db.Groups.ToList();
-
             foreach (var teacher in _teachers)
             {
-                var faculty = faculties.FirstOrDefault(f => f.Name == teacher.Cathedra.Faculty.Name);
+                var faculty = _db.Faculties.FirstOrDefault(f => f.Name == teacher.Cathedra.Faculty.Name);
                 if (faculty == null)
                 {
                     faculty = new Faculty { Name = teacher.Cathedra.Faculty.Name };
@@ -212,7 +207,7 @@ namespace Schedule.Parsers
                 teacher.Cathedra.Faculty = faculty;
                 teacher.Cathedra.FacultyId = faculty.Id;
 
-                var cathedra = cathedries.FirstOrDefault(f => f.Name == teacher.Cathedra.Name);
+                var cathedra = _db.Cathedries.FirstOrDefault(f => f.Name == teacher.Cathedra.Name);
                 if (cathedra == null)
                 {
                     cathedra = new Cathedra
@@ -226,7 +221,7 @@ namespace Schedule.Parsers
                 teacher.Cathedra = cathedra;
                 teacher.CathedraId = cathedra.Id;
 
-                var teach = teachers.FirstOrDefault(t => t.Name == teacher.Name);
+                var teach = _db.Teachers.FirstOrDefault(t => t.Name == teacher.Name);
                 if (teach == null)
                 {
                     teach = new Teacher
@@ -244,7 +239,7 @@ namespace Schedule.Parsers
                 var lessons = new List<Lesson>(teacher.Lessons.Count);
                 foreach (var l in teacher.Lessons)
                 {
-                    var group = groups.FirstOrDefault(g => g.Name == l.Group.Name);
+                    var group = _db.Groups.FirstOrDefault(g => g.Name == l.Group.Name);
                     if (group == null)
                     {
                         group = new Group { Name = l.Group.Name };
@@ -258,7 +253,6 @@ namespace Schedule.Parsers
                         Number = l.Number,
                         NumberOfWeek = l.NumberOfWeek,
                         GroupId = group.Id,
-                        Group = group,
                         Cabinet = l.Cabinet,
                         DayOfWeek = l.DayOfWeek,
                         TeacherId = teacher.Id
