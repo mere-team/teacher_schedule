@@ -54,17 +54,12 @@ namespace Schedule.Controllers
             }
             catch (Exception ex)
             {
-                string title = "ERROR: " + ex.Message + "\r\n";
-                var message = new StringBuilder();
-                message.Append("Message:\r\n" + ex.Message + "\r\n\r\n");
-                message.Append("StackTrace:\r\n" + ex.StackTrace + "\r\n\r\n");
-                if (ex.InnerException != null)
-                    message.Append("InnerException.Message:\r\n" + ex.InnerException.Message + "\r\n\r\n");
-
-                return title + message;
+                Logger.E(ex);
             }
 
-            return "Данные расписания студентов обновлены";
+            string log = Logger.LogMessages;
+            Logger.ClearMessages();
+            return "Данные расписания студентов обновлены<br><br>" + log;
         }
 
         public string RecreateDatabase()

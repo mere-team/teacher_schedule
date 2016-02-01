@@ -1,5 +1,4 @@
-﻿using System.Data.Entity;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,7 +17,6 @@ namespace Schedule.Controllers
         {
             ViewBag.Title = "УлГТУ. Расписание преподавателей.";
 
-            ViewBag.Title = "УлГТУ. Расписание преподавателей. data udated";
             ViewBag.Faculties = _db.Faculties.ToList();
 
             return View();
@@ -28,30 +26,14 @@ namespace Schedule.Controllers
         {
             var parser = new StudentScheduleParser();
 
-            var groups = parser.GetGroups();
-            var lessons = parser.GetSchedule();
+            var groups = parser.GetGroups().ToList();
+            var lessons = parser.GetSchedule().ToList();
 
-            //            var info = new StringBuilder();
-            //            info.AppendLine("========================================= ВЫВОД ДАННЫХ ============================================\r\n");
-            //            foreach (var group in groups)
-            //            {
-            //                info.AppendFormat("Group: {0} \r\n\r\n", group.Name);
-            //
-            //                foreach (var l in lessons.Where(l => l.Group.Name == group.Name))
-            //                {
-            //                    info.AppendFormat("N: {0,-2}   N: {1,-30}  D: {2,-2}  WN: {3,-2}  C: {4,-12}  G: {5,-12}  T: {6,-16}\r\n",
-            //                        l.Number,
-            //                        l.Name,
-            //                        l.DayOfWeek,
-            //                        l.NumberOfWeek,
-            //                        l.Cabinet,
-            //                        l.Group.Name,
-            //                        l.Teacher?.Name);
-            //                }
-            //                info.AppendLine("-------------------------------------------------------------------------------------------------\r\n\n");
-            //            }
-            //            info.AppendLine("=========================================== КОНЕЦ ВЫВОДA ==============================================");
+            return GetResult(groups, lessons);
+        }
 
+        private FileResult GetResult(List<StudentGroup> groups, List<StudentLesson> lessons)
+        {
             string serverPath = System.Web.HttpContext.Current.Server.MapPath("") + "+";
             var temp = serverPath.Split('\\').Last();
             serverPath = serverPath.Replace(temp, "");

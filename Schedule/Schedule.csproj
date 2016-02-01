@@ -219,6 +219,7 @@
     </Compile>
     <Compile Include="Helpers\ErrorNotificationToMail.cs" />
     <Compile Include="Helpers\ExcelDocumentDownloader.cs" />
+    <Compile Include="Helpers\Logger.cs" />
     <Compile Include="Helpers\Mail.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountBindingModels.cs" />
@@ -234,6 +235,7 @@
     <Compile Include="Models\Student Schedule Models\StudentLesson.cs" />
     <Compile Include="Models\Student Schedule Models\StudentScheduleContext.cs" />
     <Compile Include="Models\Student Schedule Models\StudentTeacher.cs" />
+    <Compile Include="Parsers\DateParser.cs" />
     <Compile Include="Parsers\TeacherScheduleParser.cs" />
     <Compile Include="Models\Teacher.cs" />
     <Compile Include="Parsers\StudentScheduleParser.cs" />

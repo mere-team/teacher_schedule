@@ -15,5 +15,10 @@ namespace Schedule.Models.Student_Schedule_Models
 
         [JsonIgnore]
         public virtual ICollection<StudentLesson> Lessons { get; set; }
+
+        public override string ToString()
+        {
+            return "Group: Id=" + Id + ", Name=" + Name;
+        }
     }
 }

@@ -24,7 +24,7 @@ namespace Schedule.Models.Student_Schedule_Models
         public int NumberOfWeek { get; set; }
 
         [Required]
-        [MaxLength(20, ErrorMessage = "Too long name of cabinet")]
+        [MaxLength(30, ErrorMessage = "Too long name of cabinet")]
         public string Cabinet { get; set; }
 
         [Required]
@@ -33,5 +33,11 @@ namespace Schedule.Models.Student_Schedule_Models
 
         public int TeacherId { get; set; }
         public virtual StudentTeacher Teacher { get; set; }
+
+        public override string ToString()
+        {
+            return "Lesson: Id=" + Id + " N=" + Number + " D=" + DayOfWeek + " WN=" + NumberOfWeek + 
+                " GI=" + GroupId + " TI=" + TeacherId + " C=" + Cabinet + " N=" + Name + " GN=" + Group?.Name + " TN=" + Teacher?.Name;
+        }
     }
 }

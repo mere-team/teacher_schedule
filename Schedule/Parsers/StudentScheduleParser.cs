@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using HtmlAgilityPack;
+using Schedule.Helpers;
 using Schedule.Models;
 using Schedule.Models.Student_Schedule_Models;
 using WebGrease.Css.Extensions;
@@ -14,21 +15,25 @@ namespace Schedule.Parsers
     {
         private readonly StudentScheduleContext _db = new StudentScheduleContext();
 
-        private readonly List<StudentGroup> _groups = new List<StudentGroup>();
-        private readonly List<StudentLesson> _lessons = new List<StudentLesson>();
-        private readonly List<StudentTeacher> _teachers = new List<StudentTeacher>();
+        private readonly List<StudentGroup> _newGroups = new List<StudentGroup>();
+        private readonly List<StudentTeacher> _newTeachers = new List<StudentTeacher>();
+        private readonly List<StudentLesson> _newLessons = new List<StudentLesson>();
 
         private readonly List<string> _scheduleUrls = new List<string>();
-        //private readonly string _examsDatesUrl = "http://www.ulstu.ru/main/view/article/12443";
-
         private readonly string _groupsScheduleUrl = "http://www.ulstu.ru/schedule/students/raspisan.htm";
         private string[] _shortSurnames;
+        private readonly WebClient _webClient;
+
+        public StudentScheduleParser()
+        {
+            _webClient = new WebClient {Encoding = Encoding.GetEncoding("windows-1251")};
+        }
 
         public IEnumerable<StudentGroup> GetGroups()
         {
-            if (_groups.Count == 0)
+            if (_newGroups.Count == 0)
                 ParseGroupsAndScheduleUrls();
-            return _groups;
+            return _newGroups;
         }
 
         private void ParseGroupsAndScheduleUrls()
@@ -50,7 +55,7 @@ namespace Schedule.Parsers
 
                     var groupName = cell.InnerText.Trim();
                     var group = new StudentGroup { Name = groupName };
-                    _groups.Add(group);
+                    _newGroups.Add(group);
 
                     var link = "http://www.ulstu.ru/schedule/students/" + cell.Attributes["href"].Value;
                     _scheduleUrls.Add(link);
@@ -58,105 +63,165 @@ namespace Schedule.Parsers
             });
         }
 
-//        private void GetDateExam()
-//        {
-//            var doc = new HtmlDocument();
-//            doc.LoadHtml(_examsDatesUrl);
-//            var noAltElements = doc.DocumentNode.SelectNodes("//li/a");
-//            if (noAltElements != null)
-//            {
-//                foreach (var text in noAltElements)
-//                {
-//                    //DEI.Name = text.InnerText.Trim();
-//                    //DEI.date = text.Attributes["title"].Value;
-//                }
-//            }
-//        }
-
         public IEnumerable<StudentLesson> GetSchedule()
         {
-            if (_groups.Count == 0)
+            if (_newGroups.Count == 0)
                 ParseGroupsAndScheduleUrls();
 
-            if (_lessons.Count != 0)
-                return _lessons;
+            if (_newLessons.Count != 0)
+                return _newLessons;
 
+            FindShortSurnames();
+
+            for (int k = 0; k < _scheduleUrls.Count; k++)
+            {
+                var group = _newGroups[k];
+                var url = _scheduleUrls[k];
+
+                ParseHtmlPage(url, group);
+            }
+
+            return _newLessons;
+        }
+
+        public IEnumerable<StudentLesson> GetSchedule(string url)
+        {
+            if (_newGroups.Count == 0)
+                ParseGroupsAndScheduleUrls();
+
+            var group = _newGroups[_scheduleUrls.IndexOf(url)];
+
+            if (_newLessons.Count != 0)
+                return _newLessons.Where(l => l.GroupId == group.Id);
+
+            FindShortSurnames();
+
+            ParseHtmlPage(url, group);
+
+            return _newLessons.Where(l => l.GroupId == group.Id);
+        }
+
+        private void ParseHtmlPage(string url, StudentGroup group)
+        {
+            var html = _webClient.DownloadString(url);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            var rows = doc.DocumentNode.SelectNodes("//tr");
+            rows.Skip(2).ForEach((row, i) =>
+            {
+                if (row == null) return;
+
+                var cols = row.SelectNodes(".//td/font");
+                cols.Skip(1).ForEach((col, j) =>
+                {
+                    if (col.InnerText.Trim() == "_") return;
+
+                    var lesson = ParseLessonHtmlNode(group, col, i, j);
+
+                    if (lesson.Name.Contains("Физкультура")) lesson.Name = "Физкультура";
+
+                    _newLessons.Add(lesson);
+                });
+            });
+        }
+
+        private void FindShortSurnames()
+        {
             _shortSurnames = new string[0];
             try
             {
                 var teacherDb = new ScheduleContext();
-                var teachers = teacherDb.Teachers.Select(t=> t.Name).ToList();
-                _shortSurnames = teachers.Where(s => s.Split(' ').First().Length <= 4).ToArray();
+                var teachers = teacherDb.Teachers.Select(t => t.Name).ToList();
+                var shortSurnames = teachers.Where(s => s.Split(' ').First().Length <= 4).ToList();
+                shortSurnames.Add("ТУР");
+                shortSurnames.Add("ЮДИН");
+                _shortSurnames = shortSurnames.ToArray();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _shortSurnames = new[] {"ЮДИН", "ТУР"};
             }
-            var webClient = new WebClient {Encoding = Encoding.GetEncoding("windows-1251")};
-            for (int k = 0; k < _scheduleUrls.Count; k++)
-            {
-                var group = _groups[k];
-                var url = _scheduleUrls[k];
-                var html = webClient.DownloadString(url);
-
-                var doc = new HtmlDocument();
-                doc.LoadHtml(html);
-
-                var rows = doc.DocumentNode.SelectNodes("//tr");
-                rows.Skip(2).ForEach((row, i) =>
-                {
-                    if (row == null) return;
-
-                    var cols = row.SelectNodes(".//td/font");
-                    cols.Skip(1).ForEach((col, j) =>
-                    {
-                        if (col.InnerText.Trim() == "_") return;
-
-                        var lesson = Algorithm2(group, col, i, j);
-
-                        if (lesson.Name.Contains("Физкультура")) lesson.Name = "Физкультура";
-
-                        _lessons.Add(lesson);
-                    });
-                });
-            }
-
-            return _lessons;
         }
 
         public void SaveInDatabase()
         {
             GetSchedule();
 
+            var groups = SaveGroupsInDatabase();
+            var teachers = SaveTeachersInDatabase();
+            SaveLessonsInDatabase(groups, teachers);
+
+            #region Old saving in db
+            //            _newLessons.ForEach(l =>
+            //            {
+            //                var group = groups.FirstOrDefault(g => g.Name == l.Group.Name);
+            //                if (group == null)
+            //                {
+            //                    group = new StudentGroup {Name = l.Group.Name};
+            //                    try {
+            //                        _db.Groups.Add(group);
+            //                        _db.SaveChanges();
+            //                        groups.Add(group);
+            //                    } catch (Exception ex) {
+            //                        Logger.E(ex);
+            //                        Logger.I(group.ToString());
+            //                    }
+            //                }
+            //                l.Group = group;
+            //                l.GroupId = group.Id;
+            //
+            //                var teacher = teachers.FirstOrDefault(t => t.Name == l.Teacher.Name);
+            //                if (teacher == null)
+            //                {
+            //                    teacher = new StudentTeacher {Name = l.Teacher.Name ?? ""};
+            //                    try { 
+            //                        _db.Teachers.Add(teacher);
+            //                        _db.SaveChanges();
+            //                        teachers.Add(teacher);
+            //                    } catch (Exception ex) {
+            //                        Logger.E(ex);
+            //                        Logger.I(group.ToString());
+            //                        Logger.I(teacher.ToString());
+            //                    }
+            //                }
+            //                l.Teacher = teacher;
+            //                l.TeacherId = teacher.Id;
+            //
+            //                var lesson = new StudentLesson
+            //                {
+            //                    Name = l.Name,
+            //                    Number = l.Number,
+            //                    NumberOfWeek = l.NumberOfWeek,
+            //                    Cabinet = l.Cabinet,
+            //                    DayOfWeek = l.DayOfWeek,
+            //                    GroupId = l.GroupId,
+            //                    TeacherId = l.TeacherId
+            //                };
+            //                try { 
+            //                    _db.Lessons.Add(lesson);
+            //                    _db.SaveChanges();
+            //                } catch (Exception ex) {
+            //                    Logger.E(ex);
+            //                    Logger.I(group.ToString());
+            //                    Logger.I(teacher.ToString());
+            //                    Logger.I(lesson.ToString());
+            //                }
+            //            });
+            #endregion
+        }
+
+        private void SaveLessonsInDatabase(List<StudentGroup> groups, List<StudentTeacher> teachers)
+        {
             _db.Database.ExecuteSqlCommand("DELETE FROM [StudentLessons]");
 
-            _lessons.ForEach(l =>
+            _newLessons.ForEach(l =>
             {
-                var group = _db.Groups.FirstOrDefault(g => g.Name == l.Group.Name);
-                if (group == null)
-                {
-                    group = new StudentGroup {Name = l.Group.Name};
-                    try {
-                        _db.Groups.Add(group);
-                        _db.SaveChanges();
-                    } catch (Exception ex) {
-                        string error = ex.Message;
-                    }
-                }
+                var group = groups.First(g => g.Name == l.Group.Name);
                 l.Group = group;
                 l.GroupId = group.Id;
 
-                var teacher = _db.Teachers.FirstOrDefault(t => t.Name == l.Teacher.Name);
-                if (teacher == null)
-                {
-                    teacher = new StudentTeacher {Name = l.Teacher.Name};
-                    try { 
-                        _db.Teachers.Add(teacher);
-                        _db.SaveChanges();
-                    } catch (Exception ex) {
-                        string error = ex.Message;
-                    }
-                }
+                var teacher = teachers.First(t => t.Name == l.Teacher.Name);
                 l.Teacher = teacher;
                 l.TeacherId = teacher.Id;
 
@@ -170,57 +235,67 @@ namespace Schedule.Parsers
                     GroupId = l.GroupId,
                     TeacherId = l.TeacherId
                 };
-                try { 
-                    _db.Lessons.Add(lesson);
-                    _db.SaveChanges();
-                } catch (Exception ex) {
-                    string error = ex.Message;
+                _db.Lessons.Add(lesson);
+            });
+            try
+            {
+                _db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Logger.E(ex);
+            }
+        }
+
+        private List<StudentTeacher> SaveTeachersInDatabase()
+        {
+            var teachers = _db.Teachers.ToList();
+            _newTeachers.ForEach(newTeacher =>
+            {
+                var teacher = teachers.FirstOrDefault(t => t.Name == newTeacher.Name);
+                if (teacher == null)
+                {
+                    teacher = new StudentTeacher {Name = newTeacher.Name};
+                    _db.Teachers.Add(teacher);
+                    teachers.Add(teacher);
                 }
             });
+            try
+            {
+                _db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Logger.E(ex);
+            }
+            return teachers;
         }
 
-        private StudentLesson Algorithm1(StudentGroup group, HtmlNode node, int i, int j)
+        private List<StudentGroup> SaveGroupsInDatabase()
         {
-            var cellPieces = node.InnerText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var groups = _db.Groups.ToList();
 
-            var lessonName = cellPieces.First() + " ";
-            var subgroup = cellPieces.Skip(1)
-                .TakeWhile(word => word.ToCharArray()
-                                    .All(c => (char.IsLower(c) || char.IsNumber(c) || char.IsPunctuation(c))) ||
-                                        (word.Length <= 4 && !_shortSurnames.Contains(word)))
-                                    .DefaultIfEmpty().ToList();
-            lessonName += subgroup.Aggregate((word, nextWord) => word + " " + nextWord);
-
-            var lesson = new StudentLesson
+            _newGroups.ForEach(newGroup =>
             {
-                Number = j + 1,
-                DayOfWeek = (i + 1) >= 7 ? i - 5 : i + 1,
-                NumberOfWeek = (i + 1) >= 7 ? 2 : 1,
-                Name = lessonName,
-                Group = group,
-                GroupId = group.Id,
-                Cabinet = cellPieces.LastOrDefault()
-            };
+                var group = groups.FirstOrDefault(g => g.Name == newGroup.Name);
+                if (group != null) return;
 
-            foreach (var element in subgroup)
-                cellPieces.Remove(element);
-
-            cellPieces.Remove(cellPieces.First());
-            cellPieces.Remove(lesson.Cabinet);
-            cellPieces.RemoveAll(word => word.Trim().Length == 0);
-            cellPieces = cellPieces.ConvertAll(word => (word.Length == 1) ? word + "." : word[0] + word.ToLowerInvariant().Substring(1));
-            var teacher = new StudentTeacher
+                group = new StudentGroup {Name = newGroup.Name};
+                _db.Groups.Add(group);
+                groups.Add(group);
+            });
+            try
             {
-                Name = cellPieces.DefaultIfEmpty()
-                            .Aggregate((word1, word2) => word1 + " " + word2)
-                            ?.Replace("-", "")
-            };
-            lesson.Teacher = teacher;
-
-            return lesson;
+                _db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Logger.E(ex);
+            }
+            return groups;
         }
 
-        private StudentLesson Algorithm2(StudentGroup group, HtmlNode node, int i, int j)
+        private StudentLesson ParseLessonHtmlNode(StudentGroup group, HtmlNode node, int i, int j)
         {
             var cellPieces = node.InnerText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
             cellPieces = cellPieces.ConvertAll(word => word.EndsWith("-") ? word.Substring(0, word.Length - 1) : word);
@@ -246,7 +321,7 @@ namespace Schedule.Parsers
                 var name = cellPieces[indexOfLast - 1];
                 var surname = cellPieces[indexOfLast - 2];
                 if (patronymic.Length == 1 && name.Length == 1 &&
-                    (surname.Length > 4 || _shortSurnames.Contains(surname)))
+                    (surname.Length >= 3 || _shortSurnames.Contains(surname)))
                 {
                     string teacherName = surname[0] + surname.ToLower().Substring(1) + " " + name.ToUpper() + "." + patronymic.ToUpper();
                     teachers.Add(teacherName);
@@ -291,9 +366,10 @@ namespace Schedule.Parsers
             };
             var teacher = new StudentTeacher
             {
-                Name = teachers.DefaultIfEmpty().Aggregate((word1, word2) => word1 + ", " + word2)
+                Name = teachers.DefaultIfEmpty().Aggregate((word1, word2) => word1 + ", " + word2) ?? "-"
             };
             lesson.Teacher = teacher;
+            _newTeachers.Add(teacher);
 
             return lesson;
         }
