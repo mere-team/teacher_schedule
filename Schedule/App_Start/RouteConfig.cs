@@ -1,17 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace TeacherSchedule
+namespace Schedule
 {
     public class RouteConfig
     {
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+
+            routes.MapRoute(
+                name: "UlstuStudent",
+                url: "ulstu/student/{action}/{id}",
+                defaults: new {controller = "UlstuStudent", id = UrlParameter.Optional}
+            );
+
+            routes.MapRoute(
+                name: "UlstuTeacher",
+                url: "ulstu/teacher/{action}/{id}",
+                defaults: new {controller = "UlstuTeacher", id = UrlParameter.Optional}
+            );
 
             routes.MapRoute(
                 name: "Default",

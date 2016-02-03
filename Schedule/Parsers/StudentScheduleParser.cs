@@ -128,19 +128,18 @@ namespace Schedule.Parsers
 
         private void FindShortSurnames()
         {
-            _shortSurnames = new string[0];
+            _shortSurnames = new[] { "ЮДИН", "ТУР", "ЛЯХ" };
             try
             {
                 var teacherDb = new ScheduleContext();
                 var teachers = teacherDb.Teachers.Select(t => t.Name).ToList();
                 var shortSurnames = teachers.Where(s => s.Split(' ').First().Length <= 4).ToList();
-                shortSurnames.Add("ТУР");
-                shortSurnames.Add("ЮДИН");
+                shortSurnames.AddRange(_shortSurnames);
                 _shortSurnames = shortSurnames.ToArray();
             }
             catch (Exception)
             {
-                _shortSurnames = new[] {"ЮДИН", "ТУР"};
+                // ignored
             }
         }
 
