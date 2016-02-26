@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Net.Mime;
 using System.Threading;
 using System.Web;
 using Schedule.Controllers;
@@ -26,9 +28,7 @@ namespace Schedule.Modules
         {
             lock (Synclock)
             {
-                var lastUpdate = DateParser.GetLastDate();
-
-                if (!UpdateToDay(lastUpdate) && _sent == false)
+                if (_sent == false)
                 {
                     try
                     {
@@ -45,6 +45,7 @@ namespace Schedule.Modules
                 }
             }
         }
+
 
         private static bool UpdateToDay(DateTime lastUpdate)
         {
