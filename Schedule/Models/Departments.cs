@@ -67,15 +67,13 @@ namespace Schedule.Models
 
         public static string GetFaculty(string cathedra)
         {
-            string result = "";
+            string result;
             try
             {
                 result = _Departments[cathedra];
             }
-            catch (Exception ex) {
-                result = "(Отсутствует)";
-                ErrorNotificationToMail.Warninig("Кафедра отсутствует в списке", cathedra);
-                ErrorNotificationToMail.Error(ex);
+            catch (Exception) {
+                result = "Другие подразделения";
             }
 
             return result;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Schedule.Helpers;
 using Schedule.Models;
@@ -35,11 +36,10 @@ namespace Schedule.Parsers
                 ParseGroupsAndScheduleUrls();
             return _newGroups;
         }
-
+        
         private void ParseGroupsAndScheduleUrls()
         {
-            var webClient = new WebClient { Encoding = Encoding.GetEncoding("windows-1251") };
-            var html = webClient.DownloadString(_groupsScheduleUrl);
+            var html = _webClient.DownloadString(_groupsScheduleUrl);
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
 
@@ -113,11 +113,11 @@ namespace Schedule.Parsers
                 if (row == null) return;
 
                 var cols = row.SelectNodes(".//td/font");
-                cols.Skip(1).ForEach((col, j) =>
+                cols.ForEach((col, j) =>
                 {
                     if (col.InnerText.Trim() == "_") return;
 
-                    var lesson = ParseLessonHtmlNode(group, col, i, j);
+                    var lesson = ParseLessonHtmlNode(group, col.InnerText, i, j);
 
                     if (lesson.Name.Contains("Физкультура")) lesson.Name = "Физкультура";
 
@@ -137,9 +137,9 @@ namespace Schedule.Parsers
                 shortSurnames.AddRange(_shortSurnames);
                 _shortSurnames = shortSurnames.ToArray();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // ignored
+                ex.ReportCrash();
             }
         }
 
@@ -214,36 +214,30 @@ namespace Schedule.Parsers
         {
             _db.Database.ExecuteSqlCommand("DELETE FROM [StudentLessons]");
 
-            _newLessons.ForEach(l =>
+            groups.ForEach(g =>
             {
-                var group = groups.First(g => g.Name == l.Group.Name);
-                l.Group = group;
-                l.GroupId = group.Id;
-
-                var teacher = teachers.First(t => t.Name == l.Teacher.Name);
-                l.Teacher = teacher;
-                l.TeacherId = teacher.Id;
-
-                var lesson = new StudentLesson
+                var groupLessons = _newLessons.Where(l => l.Group.Name == g.Name).ToList();
+                foreach (var l in groupLessons)
                 {
-                    Name = l.Name,
-                    Number = l.Number,
-                    NumberOfWeek = l.NumberOfWeek,
-                    Cabinet = l.Cabinet,
-                    DayOfWeek = l.DayOfWeek,
-                    GroupId = l.GroupId,
-                    TeacherId = l.TeacherId
-                };
-                _db.Lessons.Add(lesson);
+                    var teacher = teachers.First(t => t.Name == l.Teacher.Name);
+                    l.Teacher = teacher;
+                    l.TeacherId = teacher.Id;
+
+                    l.Group = g;
+                    l.GroupId = g.Id;
+                }
+                try
+                {
+                    _db.Lessons.AddRange(groupLessons);
+                    _db.SaveChanges();
+                    Logger.I($"Added group: {g.Name} [Id:{g.Id}]");
+                }
+                catch (Exception ex)
+                {
+                    Logger.E(ex);
+                }
             });
-            try
-            {
-                _db.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                Logger.E(ex);
-            }
+            Logger.SubmitInfoMessages();
         }
 
         private List<StudentTeacher> SaveTeachersInDatabase()
@@ -252,12 +246,11 @@ namespace Schedule.Parsers
             _newTeachers.ForEach(newTeacher =>
             {
                 var teacher = teachers.FirstOrDefault(t => t.Name == newTeacher.Name);
-                if (teacher == null)
-                {
-                    teacher = new StudentTeacher {Name = newTeacher.Name};
-                    _db.Teachers.Add(teacher);
-                    teachers.Add(teacher);
-                }
+                if (teacher != null) return;
+
+                teacher = new StudentTeacher {Name = newTeacher.Name};
+                _db.Teachers.Add(teacher);
+                teachers.Add(teacher);
             });
             try
             {
@@ -294,13 +287,36 @@ namespace Schedule.Parsers
             return groups;
         }
 
-        private StudentLesson ParseLessonHtmlNode(StudentGroup group, HtmlNode node, int i, int j)
+        private StudentLesson ParseLessonHtmlNode(StudentGroup group, string lessonInfo, int dayOfWeek, int lessonNumber)
         {
-            var cellPieces = node.InnerText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            cellPieces = cellPieces.ConvertAll(word => word.EndsWith("-") ? word.Substring(0, word.Length - 1) : word);
-            cellPieces.RemoveAll(word => word.Length == 0);
+            var returnedLessonIfError = new StudentLesson
+            {
+                Number = lessonNumber + 1,
+                DayOfWeek = (dayOfWeek + 1) >= 7 ? dayOfWeek - 5 : dayOfWeek + 1,
+                NumberOfWeek = (dayOfWeek + 1) >= 7 ? 2 : 1,
+                Name = lessonInfo,
+                Group = group,
+                GroupId = group.Id,
+                Cabinet = ""
+            };
 
-            var cabinets = cellPieces.Where(p => p.Any(char.IsDigit) && p.Contains("а.") || p.Contains("а.")).ToList();
+            List<string> cellPieces;
+            // Split lesson info to cell peaces. It contains lesson name, cabinets and teachers
+            try
+            {
+                cellPieces = lessonInfo.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries).ToList();
+                cellPieces = cellPieces.ConvertAll(word => word.EndsWith("-") ? word.Substring(0, word.Length - 1) : word);
+                cellPieces.RemoveAll(word => word.Length == 0);
+            }
+            catch (Exception ex)
+            {
+                Logger.E(ex);
+                return returnedLessonIfError;
+            }
+
+            // Delete from cell peaces strings equal "-" and cabinet. 
+            // In cell peaces stay lesson name and teachers
+            var cabinets = cellPieces.Where(p => p.Contains("а.")).ToList();
             foreach (var c in cabinets)
             {
                 int index = cellPieces.IndexOf(c) - 1;
@@ -311,53 +327,77 @@ namespace Schedule.Parsers
 
             string lessonName = null;
 
+            // Getting from cell teachers names
             var teachers = new List<string>();
             bool haveTeacher = true;
+            // Cell peaces must contain lesson name and teacher
+            // Find teachers name
             while (haveTeacher && cellPieces.Count > 3)
             {
-                int indexOfLast = cellPieces.Count - 1;
-                var patronymic = cellPieces[indexOfLast];
-                var name = cellPieces[indexOfLast - 1];
-                var surname = cellPieces[indexOfLast - 2];
-                if (patronymic.Length == 1 && name.Length == 1 &&
-                    (surname.Length >= 3 || _shortSurnames.Contains(surname)))
+                try
                 {
-                    string teacherName = surname[0] + surname.ToLower().Substring(1) + " " + name.ToUpper() + "." + patronymic.ToUpper();
-                    teachers.Add(teacherName);
-                    cellPieces.RemoveRange(indexOfLast - 2, 3);
+                    int indexOfLast = cellPieces.Count - 1;
+                    var patronymic = cellPieces[indexOfLast];
+                    var name = cellPieces[indexOfLast - 1];
+                    var surname = cellPieces[indexOfLast - 2];
+                    if (patronymic.Length == 1 && name.Length == 1 &&
+                        (surname.Length >= 3 || _shortSurnames.Contains(surname)))
+                    {
+                        string teacherName = surname[0] + surname.ToLower().Substring(1) + " " + name.ToUpper() + "." +
+                                             patronymic.ToUpper();
+                        teachers.Add(teacherName);
+                        cellPieces.RemoveRange(indexOfLast - 2, 3);
+                    }
+                    else
+                    {
+                        haveTeacher = false;
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    haveTeacher = false;
+                    Logger.E(ex);
+                    break;
                 }
             }
-            if (!teachers.Any())
+            // If teachers not found, use another algorithm. 
+            // First find lesson name, then teacher name
+            try
             {
-                lessonName = cellPieces.First() + " ";
-                var subgroup = cellPieces.Skip(1)
-                    .TakeWhile(word => word.ToCharArray()
-                                        .All(c => (char.IsLower(c) || char.IsNumber(c) || char.IsPunctuation(c))) ||
+                if (!teachers.Any())
+                {
+                    lessonName = cellPieces.First() + " ";
+                    var subgroup = cellPieces.Skip(1)
+                        .TakeWhile(word => word.ToCharArray()
+                            .All(c => (char.IsLower(c) || char.IsNumber(c) || char.IsPunctuation(c))) ||
                                             (word.Length <= 4 && !_shortSurnames.Contains(word)))
-                                        .DefaultIfEmpty().ToList();
-                lessonName += subgroup.Aggregate((word, nextWord) => word + " " + nextWord);
+                        .DefaultIfEmpty().ToList();
+                    lessonName += subgroup.Aggregate((word, nextWord) => word + " " + nextWord);
 
-                foreach (var element in subgroup)
-                    cellPieces.Remove(element);
+                    foreach (var element in subgroup)
+                        cellPieces.Remove(element);
 
-                cellPieces.Remove(cellPieces.First());
-                cellPieces = cellPieces.ConvertAll(word => (word.Length == 1) ? word + "." : word[0] + word.ToLowerInvariant().Substring(1));
-                var teacherName = cellPieces.DefaultIfEmpty()
-                    .Aggregate((word1, word2) => word1 + " " + word2)
-                    ?.Replace("-", "");
-                teachers.Add(teacherName);
+                    cellPieces.Remove(cellPieces.First());
+                    cellPieces =
+                        cellPieces.ConvertAll(
+                            word => (word.Length == 1) ? word + "." : word[0] + word.ToLowerInvariant().Substring(1));
+                    var teacherName = cellPieces.DefaultIfEmpty()
+                        .Aggregate((word1, word2) => word1 + " " + word2)
+                        ?.Replace("-", "");
+                    teachers.Add(teacherName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.E(ex);
+                return returnedLessonIfError;
             }
 
             lessonName = lessonName ?? cellPieces.Aggregate((word, nextWord) => word + " " + nextWord);
             var lesson = new StudentLesson
             {
-                Number = j + 1,
-                DayOfWeek = (i + 1) >= 7 ? i - 5 : i + 1,
-                NumberOfWeek = (i + 1) >= 7 ? 2 : 1,
+                Number = lessonNumber + 1,
+                DayOfWeek = (dayOfWeek + 1) >= 7 ? dayOfWeek - 5 : dayOfWeek + 1,
+                NumberOfWeek = (dayOfWeek + 1) >= 7 ? 2 : 1,
                 Name = lessonName,
                 Group = group,
                 GroupId = group.Id,

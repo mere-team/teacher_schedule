@@ -1,39 +1,35 @@
 ﻿using System;
 using System.Net;
 using System.Net.Mail;
-/// <summary>
-/// Отправка письма на почтовый ящик C# mail send
-/// </summary>
-/// <param name="smtpServer">Имя SMTP-сервера</param>
-/// <param name="from">Адрес отправителя</param>
-/// <param name="password">пароль к почтовому ящику отправителя</param>
-/// <param name="mailto">Адрес получателя</param>
-/// <param name="caption">Тема письма</param>
-/// <param name="message">Сообщение</param>
-/// <param name="attachFile">Присоединенный файл</param>
+
 
 public static class Mail
 {
-    public static void SendMail(string smtpServer, string from, string password,
-    string mailto, string caption, string message, string attachFile = null)
+    public static void SendMail(string subject, string message)
     {
         try
         {
-            MailMessage mail = new MailMessage();
-            mail.From = new MailAddress(from);
-            mail.To.Add(new MailAddress(mailto));
-            mail.Subject = caption;
-            mail.Body = message;
-            if (!string.IsNullOrEmpty(attachFile))
-                mail.Attachments.Add(new Attachment(attachFile));
-            SmtpClient client = new SmtpClient();
-            client.Host = smtpServer;
-            client.Port = 465;
-            client.EnableSsl = true;
-            client.Credentials = new NetworkCredential(from, password);
-            client.DeliveryMethod = SmtpDeliveryMethod.Network;
-            client.Send(mail);
-            mail.Dispose();
+            var fromAddress = new MailAddress("we.are.mere.team@gmail.com", "Schedule");
+            var toAddress = new MailAddress("we.are.mere.team@gmail.com", "Schedule");
+            const string fromPassword = "imagine_cup$2015";
+            var smtp = new SmtpClient
+            {
+                Host = "smtp.gmail.com",
+                Port = 587,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            };
+            using (var msg = new MailMessage(fromAddress, toAddress)
+            {
+                Subject = subject,
+                Body = message
+            })
+            {
+                //You can also use SendAsync method instead of Send so your application begin invoking instead of waiting for send mail to complete. SendAsync(MailMessage, Object) :- Sends the specified e-mail message to an SMTP server for delivery. This method does not block the calling thread and allows the caller to pass an object to the method that is invoked when the operation completes. 
+                smtp.Send(msg);
+            }
         }
         catch (Exception e)
         {

@@ -67,6 +67,7 @@ namespace Schedule.Controllers
             var db = new ScheduleContext();
 
             db.Database.Delete();
+            // Drop all tables by hand if not works
             db.Database.CreateIfNotExists();
             db.Database.Initialize(true);
             Database.SetInitializer(new DropCreateDatabaseAlways<ScheduleContext>());

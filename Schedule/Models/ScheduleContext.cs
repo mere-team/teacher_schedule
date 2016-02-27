@@ -5,7 +5,7 @@ namespace Schedule.Models
     internal class ScheduleContext : DbContext
     {
         public ScheduleContext()
-            : base("AzureConnection")
+            : base("AzureDatabase")
         {
         }
 

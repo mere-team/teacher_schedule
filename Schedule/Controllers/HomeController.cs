@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web.Mvc;
+using System.Web.WebSockets;
+using Schedule.Helpers;
 using Schedule.Models;
 using Schedule.Models.Student_Schedule_Models;
 using Schedule.Parsers;
@@ -17,7 +20,14 @@ namespace Schedule.Controllers
         {
             ViewBag.Title = "УлГТУ. Расписание преподавателей.";
 
-            ViewBag.Faculties = _db.Faculties.ToList();
+            try
+            {
+                ViewBag.Faculties = _db.Faculties.ToList();
+            }
+            catch (Exception ex)
+            {
+                Logger.E(ex);
+            }
 
             return View();
         }
@@ -42,6 +52,7 @@ namespace Schedule.Controllers
             var resultFile = System.IO.File.Open(path, FileMode.Create, FileAccess.ReadWrite);
             var sw = new StreamWriter(resultFile);
 
+            sw.WriteLine(Logger.LogMessages);
             sw.WriteLine("========================================= ВЫВОД ДАННЫХ ============================================\r\n");
             foreach (var group in groups)
             {

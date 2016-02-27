@@ -162,7 +162,8 @@ namespace Schedule.Parsers
             catch (Exception)
             {
                 teacher.Name = name;
-                ErrorNotificationToMail.Warninig("Ошибка при парсинге имени", "Не удалось правильно распарсить имя: " + name);
+                Logger.I("Ошибка при парсинге имени. Не удалось правильно распарсить имя: " + name);
+                Logger.SubmitInfoMessages();
             }
 
             var cathedraName = _reader.GetString(2)?.Trim();
