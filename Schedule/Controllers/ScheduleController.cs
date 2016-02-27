@@ -2,8 +2,6 @@
 using System;
 using System.Data.Entity;
 using System.IO;
-using System.Net;
-using System.Text;
 using System.Web.Mvc;
 using Schedule.Models;
 using Schedule.Models.Student_Schedule_Models;
@@ -13,36 +11,38 @@ namespace Schedule.Controllers
 {
     public class ScheduleController : Controller
     {
-        private string _fileName = "lastDateUpdate.txt";
+        private const string STUDENT = "studentLastDateUpdate.txt";
+        private const string TEACHER = "teacherLastDateUpdate.txt";
+
 
         // GET: Schedule
         public string UpdateTeacherSchedule()
         {
-            try
+            if (HasChanges(TEACHER))
             {
-                using (var downloader = new ExcelDocumentDownloader())
+                try
                 {
-                    FileStream doc;
-                    while(downloader.DownloadNextDocument(out doc))
-                    { 
-                        var parser = new TeacherScheduleParser(doc);
-                        parser.GetTeachersSchedules();
-                        parser.SaveDataInDatabase();
-                        parser.Dispose();
-                        doc.Dispose();
-                        System.IO.File.Delete(doc.Name);
+                    using (var downloader = new ExcelDocumentDownloader())
+                    {
+                        FileStream doc;
+                        while (downloader.DownloadNextDocument(out doc))
+                        {
+                            var parser = new TeacherScheduleParser(doc);
+                            parser.GetTeachersSchedules();
+                            parser.SaveDataInDatabase();
+                            parser.Dispose();
+                            doc.Dispose();
+                            System.IO.File.Delete(doc.Name);
+                        }
                     }
                 }
-            }
-            catch (Exception ex) {
-                string title = "ERROR: " + ex.Message + "\r\n";
-                var message = new StringBuilder();
-                message.Append("Message:\r\n" + ex.Message + "\r\n\r\n");
-                message.Append("StackTrace:\r\n" + ex.StackTrace + "\r\n\r\n");
-                if (ex.InnerException != null)
-                    message.Append("InnerException.Message:\r\n" + ex.InnerException.Message + "\r\n\r\n");
+                catch (Exception ex)
+                {
+                    Logger.E(ex);
+                    return ex.Message;
+                }
 
-                return title + message;
+                UpdateDate(TEACHER);
             }
 
             return "Данные расписания преподавателей обновлены";
@@ -50,7 +50,7 @@ namespace Schedule.Controllers
 
         public string UpdateStudentSchedule()
         {
-            if (HasChanges())
+            if (HasChanges(STUDENT))
             {
                 try
                 {
@@ -62,7 +62,7 @@ namespace Schedule.Controllers
                     Logger.E(ex);
                 }
 
-                UpdateDate();
+                UpdateDate(STUDENT);
             }
 
             string log = Logger.LogMessages;
@@ -70,37 +70,37 @@ namespace Schedule.Controllers
             return "Данные расписания студентов обновлены<br><br>" + log;
         }
 
-        private bool HasChanges()
+        private bool HasChanges(string fileName)
         {
-            if (!System.IO.File.Exists(Server.MapPath(_fileName)))
+            if (!System.IO.File.Exists(WebApiApplication.ServerPath + fileName))
                 return true;
 
-
-            using (StreamReader sr = new StreamReader(Server.MapPath(_fileName)))
+            string result;
+            using (var sr = new StreamReader(WebApiApplication.ServerPath + fileName))
             {
-                string result = sr.ReadToEnd();
-                sr.Close();
-
-                DateTime date;
-                if (DateTime.TryParse(result, out date))
-                {
-                    DateTime lastUpdate = DateParser.GetLastDate();
-
-                    if (lastUpdate.Day != date.Day || lastUpdate.Month != date.Month || lastUpdate.Year != date.Year)
-                        return true;
-                }
-
-                return false;
+                result = sr.ReadToEnd();
             }
+            DateTime date;
+            if (DateTime.TryParse(result, out date))
+            {
+                var lastUpdate = new DateTime();
+                if (fileName == TEACHER)
+                    lastUpdate = DateParser.GetLastUpdateTeacherSchedule();
+                else if (fileName == STUDENT)
+                    lastUpdate = DateParser.GetLastUpdateStudentSchedule();
+
+                if (lastUpdate != date)
+                    return true;
+            }
+
+            return false;
         }
 
-        private void UpdateDate()
+        private void UpdateDate(string fileName)
         {
-            using (StreamWriter sw = System.IO.File.AppendText(Server.MapPath(_fileName)))
+            using (var sw = new StreamWriter(WebApiApplication.ServerPath + fileName, false))
             {
-                sw.Flush();
-                sw.WriteLine(DateTime.Now.ToString());
-                sw.Close();
+                sw.WriteLine(DateParser.GetLastUpdateStudentSchedule());
             }
         }
 

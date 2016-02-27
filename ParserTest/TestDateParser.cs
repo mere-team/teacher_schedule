@@ -10,7 +10,7 @@ namespace ParserTest
         [TestMethod]
         public void TestMethod1()
         {
-            DateTime lastUpdate = DateParser.GetLastDate();
+            DateTime lastUpdate = DateParser.GetLastUpdateStudentSchedule();
 
             Assert.AreEqual(25, lastUpdate.Day);
             Assert.AreEqual(2, lastUpdate.Month);

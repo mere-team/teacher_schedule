@@ -11,8 +11,7 @@ namespace Schedule.Helpers
         public static void I(string info)
         {
             Sb.AppendLine("INFO: " + info).AppendLine();
-            _infoMessageCounter++;
-            if (_infoMessageCounter > 50)
+            if (_infoMessageCounter++ > 50)
             {
                 SubmitInfoMessages();
                 _infoMessageCounter = 0;

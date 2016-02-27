@@ -233,7 +233,7 @@
     <Compile Include="Models\Student Schedule Models\StudentLesson.cs" />
     <Compile Include="Models\Student Schedule Models\StudentScheduleContext.cs" />
     <Compile Include="Models\Student Schedule Models\StudentTeacher.cs" />
-    <Compile Include="Modules\ScheduleUpdate.cs" />
+    <Compile Include="Modules\ScheduleUpdater.cs" />
     <Compile Include="Parsers\DateParser.cs" />
     <Compile Include="Parsers\TeacherScheduleParser.cs" />
     <Compile Include="Models\Teacher.cs" />
