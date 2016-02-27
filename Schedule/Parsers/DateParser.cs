@@ -1,24 +1,23 @@
-﻿using HtmlAgilityPack;
+﻿using System;
+using System.Net;
 
 namespace Schedule.Parsers
 {
-    public class DateParser
+    public static class DateParser
     {
-        private readonly string _examsDatesUrl = "http://www.ulstu.ru/main/view/article/12443";
+        private static readonly string _scheduleUrl = "http://www.ulstu.ru/schedule/students/raspisan.htm";
 
-        private void GetDateExam()
+
+        public static DateTime GetLastDate()
         {
-            var doc = new HtmlDocument();
-            doc.LoadHtml(_examsDatesUrl);
-            var noAltElements = doc.DocumentNode.SelectNodes("//li/a");
-            if (noAltElements != null)
-            {
-                foreach (var text in noAltElements)
-                {
-                    //DEI.Name = text.InnerText.Trim();
-                    //DEI.date = text.Attributes["title"].Value;
-                }
-            }
+            var myHttpWebRequest = (HttpWebRequest) WebRequest.Create(_scheduleUrl);
+            var myHttpWebResponse = (HttpWebResponse) myHttpWebRequest.GetResponse();
+
+            var dayUpdate = myHttpWebResponse.LastModified;
+
+            myHttpWebResponse.Close();
+
+            return dayUpdate;
         }
     }
 }

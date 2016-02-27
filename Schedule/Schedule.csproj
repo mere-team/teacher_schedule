@@ -211,7 +211,6 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\UlstuStudentController.cs" />
-    <Compile Include="Controllers\UlstuTeacherController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ScheduleController.cs" />
     <Compile Include="Global.asax.cs">
@@ -234,6 +233,7 @@
     <Compile Include="Models\Student Schedule Models\StudentLesson.cs" />
     <Compile Include="Models\Student Schedule Models\StudentScheduleContext.cs" />
     <Compile Include="Models\Student Schedule Models\StudentTeacher.cs" />
+    <Compile Include="Modules\ScheduleUpdate.cs" />
     <Compile Include="Parsers\DateParser.cs" />
     <Compile Include="Parsers\TeacherScheduleParser.cs" />
     <Compile Include="Models\Teacher.cs" />
