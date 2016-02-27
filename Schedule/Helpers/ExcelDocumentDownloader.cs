@@ -27,9 +27,7 @@ namespace Schedule.Helpers
             if (_currentPosition == _urls.Length)
                 return false;
 
-            string serverPath = HttpContext.Current.Server.MapPath("") + "+";
-            var temp = serverPath.Split('\\').Last();
-            serverPath = serverPath.Replace(temp, "");
+            string serverPath = WebApiApplication.ServerPath;
             string fileName;    
 
             // if file busy by another process, change file name, and try again
